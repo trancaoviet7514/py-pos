@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PY POS — Máy bán hàng cho quán cà phê nhỏ</title>
+<meta name="description" content="App bán hàng cho quán cà phê, trà sữa nhỏ ở Việt Nam. Chạy hoàn toàn offline trên điện thoại — mất mạng vẫn bán được. Sơ đồ bàn, in bill, trừ kho theo công thức, báo cáo xem từ xa.">
+<meta property="og:title" content="PY POS — Máy bán hàng cho quán cà phê nhỏ">
+<meta property="og:description" content="Chạy hoàn toàn trên điện thoại. Mất mạng vẫn bán được.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232E7D32'/><path fill='%23fff' fill-rule='evenodd' d='M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z'/></svg>">
+<style>
+  /* Cùng bảng màu với app và với trang báo cáo (seedColor #2E7D32): ba
+     thứ này là một sản phẩm, mở ra phải nhận ra ngay. */
+  :root {
+    --green: #2E7D32;
+    --green-dark: #1B5E20;
+    --green-soft: #E8F1E4;
+    --bg: #F7FAF3;
+    --surface: #FFFFFF;
+    --line: #DDE5D8;
+    --text: #1A1C19;
+    --muted: #5A6157;
+    --shadow: 0 1px 2px rgba(26, 28, 25, .04), 0 8px 24px rgba(26, 28, 25, .05);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Chủ quán đọc trang này trên điện thoại, buổi tối sau khi đóng cửa —
+     nên bó bề rộng lại và để chữ to hơn mức mặc định của web. */
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--green-dark); }
+  img, svg { max-width: 100%; }
+
+  /* ---------- thanh trên ---------- */
+  .top {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(247, 250, 243, .92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .top-in {
+    max-width: 980px; margin: 0 auto; padding: 10px 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: var(--text); }
+  .brand svg { width: 30px; height: 30px; }
+  .nav { margin-left: auto; display: flex; align-items: center; gap: 22px; }
+  .nav a { color: var(--muted); text-decoration: none; font-size: 16px; }
+  .nav a:hover { color: var(--green-dark); }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 60px 0 44px; text-align: center; }
+  .logo { width: 88px; height: 88px; }
+  .chip {
+    display: inline-block; margin-bottom: 18px; padding: 5px 13px;
+    background: var(--green-soft); color: var(--green-dark);
+    border-radius: 999px; font-size: 14px; font-weight: 600;
+  }
+  h1 { font-size: 40px; line-height: 1.15; margin: 14px 0 12px; letter-spacing: -.5px; }
+  .tagline { font-size: 21px; color: var(--muted); margin: 0 auto; max-width: 34ch; }
+
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+  .btn {
+    display: inline-block; padding: 14px 26px; border-radius: 12px;
+    font-size: 17px; font-weight: 600; text-decoration: none; border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-secondary { background: var(--surface); color: var(--green-dark); border-color: var(--line); }
+  /* Nút chưa dùng được thì phải TRÔNG như chưa dùng được. Một nút xanh đẹp
+     mà bấm không ra gì là cách nhanh nhất để mất lòng tin ngay ở trang đầu. */
+  .btn-waiting {
+    background: var(--surface); color: var(--muted);
+    border: 1px dashed var(--line); cursor: not-allowed;
+  }
+
+  /* ---------- dải điểm mạnh ---------- */
+  .strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px; margin-top: 40px;
+  }
+  .strip div {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px; text-align: left;
+  }
+  .strip b { display: block; font-size: 16px; margin-bottom: 2px; }
+  .strip span { color: var(--muted); font-size: 15px; }
+
+  /* ---------- mục ---------- */
+  section { padding: 48px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 27px; margin: 0 0 8px; letter-spacing: -.3px; }
+  .lead { color: var(--muted); margin: 0 0 26px; font-size: 18px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px; box-shadow: var(--shadow);
+  }
+  .card .ico {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--green-soft);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+  }
+  .card .ico svg { width: 21px; height: 21px; stroke: var(--green-dark); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .card h3 { font-size: 17px; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card p { margin: 0; color: var(--muted); font-size: 16px; }
+  .tag {
+    font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: var(--green-soft); color: var(--green-dark); white-space: nowrap;
+  }
+
+  .offline {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--green); border-radius: 16px; padding: 22px 24px;
+    box-shadow: var(--shadow);
+  }
+  .offline p { margin-top: 0; }
+  .offline p:last-child { margin-bottom: 0; }
+
+  /* ---------- các bước ---------- */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; counter-reset: b; }
+  .step {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; box-shadow: var(--shadow);
+  }
+  .step::before {
+    counter-increment: b; content: counter(b);
+    display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 999px;
+    background: var(--green); color: #fff; font-weight: 700; font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .step h3 { font-size: 17px; margin: 0 0 6px; }
+  .step p { margin: 0; color: var(--muted); font-size: 16px; }
+
+  /* ---------- phù hợp ---------- */
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; padding: 9px 16px; font-size: 16px;
+  }
+
+  /* ---------- câu hỏi ---------- */
+  details {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 20px; margin-bottom: 10px;
+  }
+  details summary { font-weight: 600; cursor: pointer; }
+  details summary::marker { color: var(--green); }
+  details p { color: var(--muted); margin: 10px 0 0; }
+
+  ul.plain { padding-left: 22px; margin: 0; color: var(--muted); }
+  ul.plain li { margin-bottom: 8px; }
+
+  /* ---------- liên hệ ---------- */
+  .contact {
+    background: var(--green); color: #fff; border-radius: 18px;
+    padding: 30px 26px; text-align: center;
+  }
+  .contact h2 { color: #fff; }
+  .contact p { color: rgba(255,255,255,.88); margin: 0 auto 20px; max-width: 46ch; }
+  .contact .btn-secondary { background: #fff; border-color: #fff; }
+
+  footer { padding: 34px 0 52px; color: var(--muted); font-size: 15px; border-top: 1px solid var(--line); }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 30px; }
+    .tagline { font-size: 18px; }
+    h2 { font-size: 23px; }
+    .hero { padding: 36px 0 30px; }
+    .nav { display: none; }
+    .btn { display: block; width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="top-in">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 100 100" role="img" aria-label="PY POS">
+        <rect width="100" height="100" rx="22" fill="#2E7D32"/>
+        <path fill="#fff" fill-rule="evenodd" d="M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z"/>
+      </svg>
+      PY POS
+    </a>
+    <nav class="nav">
+      <a href="#tinh-nang">Tính năng</a>
+      <a href="#bat-dau">Bắt đầu</a>
+      <a href="#cau-hoi">Câu hỏi</a>
+      <a href="#lien-he">Liên hệ</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="logo" viewBox="0 0 100 100" role="img" aria-label="PY POS">
+      <rect width="100" height="100" rx="22" fill="#2E7D32"/>
+      <path fill="#fff" fill-rule="evenodd" d="M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z"/>
+    </svg>
+    <h1>Máy bán hàng cho quán cà phê nhỏ</h1>
+    <p class="tagline">Chạy hoàn toàn trên điện thoại. Mất mạng vẫn bán được.</p>
+
+    <div class="cta">
+      <!-- Giữ nguyên trạng thái "sắp có" cho tới lúc có link Play Store thật
+           — đừng trỏ tạm vào đâu cả. -->
+      <span class="btn btn-waiting">Sắp có trên Google Play</span>
+      <a class="btn btn-secondary" href="https://trancaoviet7514.github.io/py-pos-bao-cao/">Xem trang báo cáo</a>
+    </div>
+
+    <div class="strip">
+      <div><b>Không cần mạng</b><span>Bán, in bill, trừ kho đều chạy khi mất mạng</span></div>
+      <div><b>Không cần máy tính</b><span>Một cái điện thoại Android là đủ mở quán</span></div>
+      <div><b>Không cần cài đặt phức tạp</b><span>Có sẵn menu mẫu quán cà phê để sửa lại</span></div>
+      <div><b>Dữ liệu là của bạn</b><span>Nằm trong máy, sao lưu ra một file mang đi</span></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Vì sao lại là offline</h2>
+    <div class="offline">
+      <p>Quán đang đông, khách đứng chờ lấy đồ, mà mạng chập chờn — đó đúng là
+      lúc một cái máy bán hàng cần mạng trở thành vô dụng.</p>
+      <p>PY POS lưu mọi thứ ngay trong điện thoại. Không mạng thì vẫn tính
+      tiền, vẫn in bill, vẫn trừ kho như bình thường. Có mạng thì đơn tự gửi
+      lên để bạn xem báo cáo từ nhà.</p>
+      <p>Không phải kiểu "dùng tạm khi mất mạng". Offline là cách nó chạy bình
+      thường.</p>
+    </div>
+  </section>
+
+  <section id="tinh-nang">
+    <h2>Những việc ở quầy</h2>
+    <p class="lead">Thứ nhân viên bấm cả ngày, nên bấm phải nhanh.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <h3>Sơ đồ bàn</h3>
+        <p>Nhìn là biết bàn nào đang có khách, bàn nào đã gọi món. Khách gọi
+        thêm thì cộng vào đúng bàn đó, không phải nhớ trong đầu.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M6 2h12l-1 5H7L6 2Z"/><path d="M7 7v13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"/><path d="M9 12h6"/></svg></div>
+        <h3>Món có size và topping</h3>
+        <p>Khai một lần: size nào giá nào, thêm trân châu thì cộng bao nhiêu.
+        Không phải tạo mười món gần giống nhau cho một ly trà sữa.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M7 8V3h10v5"/><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M7 16h10v5H7z"/></svg></div>
+        <h3>In bill và in tem <span class="tag">sắp có</span></h3>
+        <p>Bill cho khách, tem dán ly cho bạn pha chế — cùng một lần bấm thanh
+        toán, ra máy in nhiệt 58mm nối Bluetooth.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+        <h3>Tiền lẻ gợi ý sẵn</h3>
+        <p>Khách đưa tờ 500 nghìn, app gợi ý sẵn mấy mệnh giá hay gặp để bấm
+        một cái là xong, khỏi tính nhẩm tiền thối lúc đang đông.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg></div>
+        <h3>Giảm giá, hoàn tiền, hàng tặng</h3>
+        <p>Ba việc khác nhau và vào báo cáo theo ba cách khác nhau, không gộp
+        chung thành một cục để cuối tháng không biết tiền đi đâu.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+        <h3>Ca làm việc — nếu cần</h3>
+        <p>Quán nhiều người thay ca thì mở ca, đóng ca, đếm tiền đối chiếu.
+        Quán chủ tự bán thì tắt đi, khỏi thêm một bước mỗi sáng.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Những việc của chủ quán</h2>
+    <p class="lead">Thứ bạn mở ra mỗi tối, hoặc mỗi tuần một lần.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1.5 12h-11L5 8Z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/></svg></div>
+        <h3>Bán một ly là trừ kho</h3>
+        <p>Khai công thức một lần: một ly bạc xỉu tốn bao nhiêu gam cà phê,
+        bao nhiêu ml sữa. Bán xong app tự trừ, sắp hết thì báo.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h10"/></svg></div>
+        <h3>Ai đã làm gì</h3>
+        <p>Hủy đơn, sửa đơn đã thanh toán, giảm giá — mỗi việc ghi lại tên
+        người làm và lúc nào. Đây là chỗ cho bạn biết tiền đi đâu.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.2 8 9 4.6-.8 8-4 8-9V6l-8-3Z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Phân quyền</h3>
+        <p>Nhân viên bán hàng bình thường nhưng không thấy tổng doanh thu và
+        không sửa được giá món. Mỗi người một mã PIN riêng.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
+        <h3>Báo cáo xem từ xa</h3>
+        <p>Không cần ngồi ở quán. Mở trang web trên điện thoại riêng là thấy
+        doanh thu hôm nay, 7 ngày, tháng này, và món nào bán chạy.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M14 3v5h5"/><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-5Z"/><path d="M9 14h6M9 17h4"/></svg></div>
+        <h3>Xuất file cho Excel</h3>
+        <p>Doanh thu từng ngày, lịch sử ca — xuất ra CSV để tự tính hoặc gửi
+        cho kế toán, không phải chép tay lại.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg></div>
+        <h3>Sao lưu</h3>
+        <p>Một file duy nhất, gửi qua Zalo hay để trên Drive. Đổi điện thoại
+        thì khôi phục lại, không mất đơn nào.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Phù hợp với quán nào</h2>
+    <p class="lead">Làm cho quán nhỏ, nên bỏ hẳn những thứ quán nhỏ không dùng.</p>
+    <div class="pills">
+      <span class="pill">Cà phê take-away</span>
+      <span class="pill">Cà phê có bàn</span>
+      <span class="pill">Trà sữa</span>
+      <span class="pill">Nước ép, sinh tố</span>
+      <span class="pill">Ăn sáng, bánh</span>
+      <span class="pill">Quán một mình chủ bán</span>
+      <span class="pill">Quán 2–5 nhân viên</span>
+    </div>
+  </section>
+
+  <section id="bat-dau">
+    <h2>Bắt đầu trong 15 phút</h2>
+    <p class="lead">Không cần ai tới lắp đặt, không cần khóa học.</p>
+    <div class="steps">
+      <div class="step">
+        <h3>Cài app, đặt tên quán</h3>
+        <p>Một cái điện thoại Android là đủ. Đặt tên quán và mã PIN của chủ
+        quán là bán được ngay.</p>
+      </div>
+      <div class="step">
+        <h3>Sửa lại menu mẫu</h3>
+        <p>App có sẵn menu quán cà phê: cà phê sữa, bạc xỉu, trà đào… Sửa giá
+        và xóa món không bán, nhanh hơn là nhập từ số không.</p>
+      </div>
+      <div class="step">
+        <h3>Bán và xem báo cáo từ nhà</h3>
+        <p>Bán cả ngày không cần mạng. Có mạng thì đơn tự gửi lên, tối mở
+        trang báo cáo trên điện thoại riêng là thấy số.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Đang làm</h2>
+    <p class="lead">Nói trước cái gì chưa có, để bạn đừng chờ nhầm.</p>
+    <ul class="plain">
+      <li>Nhiều máy trong cùng một quán, bán cùng lúc</li>
+      <li>Màn hình bếp và phiếu bếp</li>
+      <li>Nhận đơn từ app giao hàng</li>
+      <li>Bản cho máy tính và máy tính bảng</li>
+    </ul>
+  </section>
+
+  <section id="cau-hoi">
+    <h2>Câu hỏi thường gặp</h2>
+    <p class="lead">Mấy câu chủ quán hỏi đầu tiên.</p>
+
+    <details open>
+      <summary>Mất mạng thì có bán được không?</summary>
+      <p>Được, và đó là điểm chính của app. Mọi thứ lưu ngay trong điện thoại:
+      tính tiền, thối tiền, trừ kho, xem lại đơn cũ đều chạy bình thường khi
+      không có mạng. Có mạng trở lại thì đơn tự gửi lên, bạn không phải bấm
+      gì.</p>
+    </details>
+
+    <details>
+      <summary>Có cần mua máy tính hay máy POS không?</summary>
+      <p>Không. Một điện thoại Android là đủ. Nếu muốn in bill thì thêm một
+      máy in nhiệt 58mm nối Bluetooth — loại phổ biến, giá vài trăm nghìn.</p>
+    </details>
+
+    <details>
+      <summary>Điện thoại hư hoặc đổi máy thì dữ liệu có mất không?</summary>
+      <p>Trong app có màn Sao lưu, xuất ra đúng một file. Gửi file đó qua Zalo
+      cho chính mình hoặc để trên Google Drive. Máy mới cài app xong khôi phục
+      lại là đủ đơn, đủ menu, đủ kho.</p>
+    </details>
+
+    <details>
+      <summary>Nhân viên có xem được doanh thu của quán không?</summary>
+      <p>Không, nếu bạn không muốn. Mỗi người một mã PIN riêng; tài khoản nhân
+      viên bán hàng bình thường nhưng không vào được báo cáo và không sửa được
+      giá món. Hủy đơn hay giảm giá đều ghi lại tên người làm.</p>
+    </details>
+
+    <details>
+      <summary>Tôi xem báo cáo ở đâu?</summary>
+      <p>Trên chính điện thoại bán hàng, hoặc mở
+      <a href="https://trancaoviet7514.github.io/py-pos-bao-cao/">trang báo cáo</a>
+      bằng điện thoại riêng của bạn — không cần cài thêm gì, đăng nhập bằng
+      tài khoản quán là thấy số.</p>
+    </details>
+
+    <details>
+      <summary>App có tiếng Việt không?</summary>
+      <p>Toàn bộ app là tiếng Việt, làm riêng cho quán ở Việt Nam. Tiền tính
+      bằng đồng, không có phần thập phân lẻ.</p>
+    </details>
+  </section>
+
+  <section id="lien-he">
+    <div class="contact">
+      <h2>Muốn dùng thử?</h2>
+      <p>App đang chạy thật ở quán và sắp lên Google Play. Nhắn cho tôi để
+      nhận bản dùng thử và góp ý thêm cho quán của bạn.</p>
+      <a class="btn btn-secondary" href="KENH_LIEN_HE">Liên hệ</a>
+    </div>
+  </section>
+
+  <footer>
+    PY POS — app bán hàng cho quán cà phê nhỏ ở Việt Nam.<br>
+    <a href="https://trancaoviet7514.github.io/py-pos-bao-cao/">Trang xem báo cáo</a>
+  </footer>
+
+</div>
+
+</body>
+</html>

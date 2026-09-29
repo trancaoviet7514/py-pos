@@ -151,12 +151,11 @@
   .btn-primary { background: var(--green); color: #fff; }
   .btn-primary:hover { background: var(--green-dark); }
   .btn-secondary { background: var(--surface); color: var(--green-dark); border-color: var(--line); }
-  /* Nút chưa dùng được thì phải TRÔNG như chưa dùng được. Một nút xanh đẹp
-     mà bấm không ra gì là cách nhanh nhất để mất lòng tin ngay ở trang đầu. */
-  .btn-waiting {
-    background: var(--surface); color: var(--muted);
-    border: 1px dashed var(--line); cursor: not-allowed;
-  }
+  /* Lớp .btn-waiting (nút "sắp có Google Play", viền đứt, không bấm được) đã
+     BỎ ngày 29/09/2026: app lên Play thật rồi nên không còn nút nào phải giả
+     vờ chờ nữa. Nếu sau này có tính năng chưa xong cần một nút như vậy thì
+     xem lại lịch sử git — nhưng cân nhắc kỹ, vì một nút bấm không ra gì là
+     cách nhanh nhất mất lòng tin ngay ở trang đầu. */
 
   /* ---------- dải điểm mạnh ---------- */
   .strip {
@@ -492,6 +491,8 @@
   .contact-in { text-align: center; padding: 8px 0; }
   .contact-in p { color: rgba(255,255,255,.86); margin: 0 auto 26px; max-width: 46ch; }
   .btn-to { padding: 17px 34px; font-size: 18px; }
+  .tai-play { margin: 18px 0 0 !important; font-size: 15px; }
+  .tai-play a { color: #fff; }
 
   footer { padding: 40px 0 52px; color: var(--muted); font-size: 15px; border-top: 1px solid var(--line); }
   footer a { color: var(--muted); }
@@ -572,7 +573,7 @@
 
         <div class="cta">
           <a class="btn btn-primary" href="https://zalo.me/0934773909">Nhận bản dùng thử</a>
-          <a class="btn btn-secondary" href="#gia">Xem giá</a>
+          <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Tải trên Google Play</a>
         </div>
 
         <!-- Bốn số này đều là thứ mình TỰ quyết, nên nói bao nhiêu lần cũng
@@ -1133,6 +1134,7 @@
       có bếp hay không, một quán hay nhiều quán — rồi tôi báo đúng gói và
       cách bắt đầu.</p>
       <a class="btn btn-secondary btn-to" href="https://zalo.me/0934773909">Nhắn Zalo 0934 773 909</a>
+      <p class="tai-play">Hoặc <a href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">tải app trên Google Play</a> để xem thử trước.</p>
     </div>
     </div>
   </section>
@@ -1166,6 +1168,7 @@
       </div>
       <div class="chan-cot">
         <b>Liên hệ</b>
+        <a href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Tải trên Google Play</a>
         <a href="https://zalo.me/0934773909">Zalo 0934 773 909</a>
         <a href="https://trancaoviet7514.github.io/py-pos-bao-cao/">Trang xem báo cáo</a>
       </div>

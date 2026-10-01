@@ -3,10 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PY POS — Bộ giải pháp bán hàng cho quán cà phê và trà sữa</title>
-<meta name="description" content="Bộ giải pháp bán hàng cho quán cà phê, trà sữa ở Việt Nam: máy bán hàng trên điện thoại, tablet và máy tính, màn hình bếp, web order, báo cáo từ xa, nhiều chi nhánh. Mất mạng vẫn bán được. Trả một lần, dùng mãi.">
-<meta property="og:title" content="PY POS — Bộ giải pháp bán hàng cho quán cà phê và trà sữa">
-<meta property="og:description" content="Máy bán hàng, màn hình bếp, web order, báo cáo từ xa. Mất mạng vẫn bán được. Trả một lần, dùng mãi.">
+<!-- Tiêu đề và mô tả phải KHỚP với tiêu đề + phụ đề ở đầu trang. Đây là
+     chữ Google hiện trong kết quả tìm kiếm và là chữ Zalo/Facebook hiện khi
+     ai đó dán link — người đọc thấy nó TRƯỚC khi vào trang, nên lệch nhau là
+     mất lòng tin ngay ở câu đầu.
+
+     Đổi tiêu đề trang thì sửa luôn ba dòng dưới. Bản trước lệch vì h1 đã đổi
+     mà đây để nguyên, nên Google vẫn hiện "Bộ giải pháp bán hàng cho quán cà
+     phê và trà sữa" trong khi trang đã nói chuyện khác.
+
+     Mô tả giữ dưới ~160 ký tự: dài hơn thì Google cắt giữa chừng bằng dấu ba
+     chấm, và câu bị cắt thường rơi đúng vào chỗ đang liệt kê. -->
+<title>PY POS — Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê</title>
+<meta name="description" content="Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê: phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp, máy quét mã vạch, thiết bị cầm tay.">
+<meta property="og:title" content="PY POS — Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê">
+<meta property="og:description" content="Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp, máy quét mã vạch, thiết bị cầm tay. Mất mạng vẫn bán được. Trả một lần, dùng mãi.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232E7D32'/><path fill='%23fff' fill-rule='evenodd' d='M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z'/></svg>">
 <style>
@@ -388,52 +399,117 @@
     background: var(--surface); border: 1px solid var(--line); color: var(--muted);
   }
   .pos-chip i.chon { background: var(--green); border-color: var(--green); color: #fff; }
-  .pos-luoi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; flex: 1; }
-  .pos-mon {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 5px;
-    padding: 4px; font-size: 8px; line-height: 1.3; display: flex;
-    flex-direction: column; justify-content: center; align-items: center;
-    text-align: center; gap: 3px;
+  /* Danh sách món: HAI cột, mỗi dòng có ô ảnh + tên + giá — đúng như app.
+     Bản trước là lưới ba cột chỉ có chữ, nhìn giống máy bán vé hơn là một
+     menu đồ uống. */
+  .pos-ds {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+    align-content: start; flex: 1; overflow: hidden;
   }
-  .pos-mon b { font-weight: 600; }
-  .pos-mon span { color: var(--green-dark); font-weight: 700; }
+  .pos-mon {
+    position: relative;
+    background: var(--surface); border-radius: 4px;
+    padding: 3px 5px 3px 3px; font-size: 7px; line-height: 1.25;
+    display: grid; grid-template-columns: auto 1fr; gap: 0 4px;
+    align-items: center;
+  }
+  /* Ô ảnh món: khối màu chứ không phải ảnh thật. Ở bề ngang 14px thì một
+     tấm ảnh cà phê chỉ còn là một đốm nâu — tốn băng thông mà không thêm
+     thông tin gì. Màu khác nhau để danh sách nhìn ra là CÓ ảnh. */
+  .pos-anh {
+    grid-row: span 2; width: 14px; height: 14px; border-radius: 3px;
+    background: var(--green-soft);
+  }
+  .pos-anh.a1, .pos-anh.a6 { background: #6B4A2E; }
+  .pos-anh.a2, .pos-anh.a3 { background: #C8A06A; }
+  .pos-anh.a4, .pos-anh.a5 { background: #D8C3A0; }
+  .pos-anh.a7 { background: #E8A33D; }
+  .pos-anh.a8 { background: #D4596B; }
+  .pos-mon b { font-weight: 600; align-self: end; }
+  .pos-mon span { color: var(--green-dark); font-weight: 700; align-self: start; }
+  /* Số phần đã gọi: chấm tròn xanh ở mép phải, giống hệt app. */
+  .pos-mon em {
+    position: absolute; right: 3px; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 10px; border-radius: 999px;
+    background: var(--green); color: #fff; font-style: normal;
+    font-size: 6px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
   .pos-phai {
     width: 37%; background: var(--surface); border-left: 1px solid var(--line);
     padding: 7px; display: flex; flex-direction: column; font-size: 8px;
   }
   .pos-phai .ban { font-size: 10px; font-weight: 700; margin-bottom: 5px; }
-  .pos-dong { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed var(--line); }
-  .pos-tong { display: flex; justify-content: space-between; font-weight: 700; font-size: 10px; margin-top: 6px; }
+  .pos-dong { display: flex; justify-content: space-between; padding: 3px 0 1px; font-weight: 600; }
+  /* Dòng phụ dưới mỗi món: đơn giá, hoặc tùy chọn khách dặn ("Thêm thạch",
+     "Ít đá"). App có thật, và nó là thứ phân biệt phần mềm quán nước với một
+     cái máy tính tiền. */
+  .pos-phu { color: var(--muted); font-size: 7px; padding-bottom: 4px; border-bottom: 1px dashed var(--line); }
+  /* Gửi bếp là nút VIỀN, tách khỏi Thanh toán — hai việc khác nhau: gửi món
+     xuống bếp không phải là thu tiền. */
+  .pos-gui {
+    margin-top: auto; border: 1px solid var(--green); color: var(--green-dark);
+    border-radius: 4px; text-align: center; padding: 4px; font-weight: 600;
+    font-size: 7px;
+  }
+  .pos-tong { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: 9px; margin-top: 6px; }
   .pos-btn {
-    margin-top: auto; background: var(--green); color: #fff; border-radius: 5px;
+    margin-top: 5px; background: var(--green); color: #fff; border-radius: 5px;
     text-align: center; padding: 5px; font-weight: 700; font-size: 9px;
   }
   .pos-co { width: 26%; height: 14px; margin: 0 auto; background: #1A1C19; }
   .pos-de { width: 46%; height: 8px; margin: 0 auto; background: #1A1C19; border-radius: 0 0 7px 7px; }
 
   /* trang web xem báo cáo: khung trình duyệt */
+  /* container-type để mọi thứ bên trong đo được theo BỀ NGANG KHUNG (đơn vị
+     cqw), không theo px cố định.
+
+     Màn báo cáo giờ có chip chọn kỳ, khối tóm tắt, biểu đồ và bảng món bán
+     chạy — khai bằng px thì vừa đúng ở bề ngang desktop, nhưng thu xuống
+     375px là 13 phần tử tràn ra ngoài khung. Đã dính đúng cái bẫy này một
+     lần ở cụm thiết bị hồi 30/09. */
   .web-vien {
+    container-type: inline-size;
     border: 1px solid var(--line); border-radius: 11px; overflow: hidden;
     background: var(--surface); box-shadow: 0 16px 34px rgba(26, 28, 25, .12);
   }
   .web-thanh {
-    display: flex; align-items: center; gap: 5px; padding: 7px 10px;
+    display: flex; align-items: center; gap: 1.1cqw; padding: 1.5cqw 2.1cqw;
     background: #EAF0E6; border-bottom: 1px solid var(--line);
   }
-  .web-den { width: 7px; height: 7px; border-radius: 999px; background: #C3CCBE; }
+  .web-den { width: 1.5cqw; height: 1.5cqw; border-radius: 999px; background: #C3CCBE; }
   .web-o {
-    margin-left: 6px; flex: 1; height: 14px; border-radius: 999px; background: #fff;
-    border: 1px solid var(--line); font-size: 8px; color: var(--muted);
-    display: flex; align-items: center; padding: 0 7px;
+    margin-left: 6px; flex: 1; height: 3cqw; border-radius: 999px; background: #fff;
+    border: 1px solid var(--line); font-size: 1.7cqw; color: var(--muted);
+    display: flex; align-items: center; padding: 0 1.5cqw;
   }
-  .web-man { aspect-ratio: 16 / 9.4; padding: 10px; background: var(--surface); }
-  .web-nho { font-size: 8px; color: var(--muted); }
-  .web-to { font-size: 19px; font-weight: 700; letter-spacing: -.5px; margin: 1px 0 6px; }
-  .web-oi { display: flex; gap: 12px; margin-bottom: 8px; }
-  .web-oi div b { display: block; font-size: 10px; }
-  .cot-bd { display: flex; align-items: flex-end; gap: 4px; height: 58px; }
+  /* Khung cao hơn 16/9.4 của bản trước: màn báo cáo giờ có thêm dải chip
+     chọn kỳ và bảng món bán chạy, nhét vào khung cũ thì thừa 28px và tràn ra
+     ngoài. Cửa sổ trình duyệt thật vốn cao hơn tỉ lệ phim, nên nới ra cũng
+     đúng hơn. */
+  .web-man { aspect-ratio: 16 / 10.8; padding: 1.7cqw 2.1cqw; background: var(--surface); overflow: hidden; }
+  /* Dải chip chọn kỳ — app có Ngày / 30 ngày / Tháng này / Tháng trước. */
+  .web-ky { display: flex; gap: 0.9cqw; margin-bottom: 1.3cqw; }
+  .web-ky i {
+    font-style: normal; font-size: 1.5cqw; padding: 0.4cqw 1.3cqw; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); white-space: nowrap;
+  }
+  .web-ky i.chon { background: var(--green-soft); border-color: var(--green-soft); color: var(--green-dark); font-weight: 700; }
+  /* Khối tóm tắt nền xanh nhạt, đúng như app. */
+  .web-tom { background: var(--green-soft); border-radius: 1.3cqw; padding: 1.3cqw 1.7cqw; margin-bottom: 1.3cqw; }
+  .web-nhan { font-weight: 700; color: var(--text); margin: 0 0 0.9cqw; }
+  .web-nho { font-size: 1.7cqw; color: var(--muted); }
+  .web-to { font-size: 3.6cqw; font-weight: 700; letter-spacing: -.5px; margin: 0.2cqw 0 1.1cqw; }
+  .web-oi { display: flex; gap: 2.6cqw; margin-bottom: 0; }
+  .web-oi div b { display: block; font-size: 2.1cqw; }
+  .cot-bd { display: flex; align-items: flex-end; gap: 0.9cqw; height: 7.2cqw; margin-bottom: 1.3cqw; }
   .cot-bd i { flex: 1; display: block; background: var(--green-soft); border-radius: 2px 2px 0 0; }
   .cot-bd i.cao { background: var(--green); }
+  /* Bảng món bán chạy — thứ chủ quán mở báo cáo ra để xem. */
+  .web-top { display: grid; gap: 0.6cqw; }
+  .web-top > div { display: grid; grid-template-columns: 2.1cqw 1fr auto; gap: 1.3cqw; align-items: baseline; font-size: 1.5cqw; }
+  .web-top b { color: var(--green-dark); font-weight: 700; }
+  .web-top em { font-style: normal; color: var(--muted); }
 
   /* tablet: màn ngang, sơ đồ bàn */
   .tab-vien {
@@ -445,10 +521,16 @@
   .tab-ban {
     background: var(--surface); border: 1px solid var(--line); border-radius: 5px;
     padding: 5px 3px; font-size: 8px; text-align: center; font-weight: 600;
+    min-height: 26px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1px;
   }
+  .tab-ban em { font-style: normal; font-weight: 400; font-size: 6px; color: var(--muted); }
   /* Bàn đang có khách tô xanh: một sơ đồ bàn mà bàn nào cũng trắng thì
      không nói được điều duy nhất nó dùng để nói. */
-  .tab-ban.co { background: var(--green-soft); border-color: var(--green); color: var(--green-dark); }
+  /* Bàn có khách: VẠCH xanh ở mép trái, không tô kín cả thẻ. Tô kín thì sơ
+     đồ bàn thành một bảng màu, mà thứ cần đọc nhanh nhất là bàn nào còn
+     trống — nền trắng phải là cái nổi lên. */
+  .tab-ban.co { border-left: 3px solid var(--green); }
 
   /* điện thoại và máy cầm tay: lồng ảnh chụp thật */
   .dt-vien {
@@ -721,7 +803,7 @@
       </svg>
         <h1>Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê</h1>
         <p class="tagline">Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp,
-        web order, báo cáo từ xa.</p>
+        máy quét mã vạch, thiết bị cầm tay.</p>
 
         <!-- Nút CHÍNH giờ là tải app, nút phụ là Zalo — đảo so với bản trước.
              Bản trước để Zalo làm nút chính vì app trên Play miễn phí mà trang
@@ -835,24 +917,32 @@
       <div class="tb">
         <div class="pos-vien">
           <div class="pos-man man">
+            <!-- Dựng theo ĐÚNG màn bán hàng của app chạy trên máy POS: menu
+                 là danh sách HAI CỘT có ảnh món, không phải lưới ba cột chỉ
+                 có chữ; cột phải tên là "Giỏ hàng" chứ không phải tên bàn; và
+                 có nút "Gửi bếp" riêng, tách khỏi nút Thanh toán. -->
             <div class="pos-trai">
-              <div class="pos-chip"><i class="chon">Tất cả</i><i>Cà phê</i><i>Trà</i><i>Đá xay</i></div>
-              <div class="pos-luoi">
-                <div class="pos-mon"><b>Cà phê đen</b><span>18.000đ</span></div>
-                <div class="pos-mon"><b>Cà phê sữa</b><span>25.000đ</span></div>
-                <div class="pos-mon"><b>Bạc xỉu</b><span>29.000đ</span></div>
-                <div class="pos-mon"><b>Cappuccino</b><span>24.000đ</span></div>
-                <div class="pos-mon"><b>Latte</b><span>24.000đ</span></div>
-                <div class="pos-mon"><b>Trà đào cam sả</b><span>35.000đ</span></div>
+              <div class="pos-chip"><i class="chon">Tất cả</i><i>Cà phê</i><i>Trà</i><i>Đá xay</i><i>Nước ép</i></div>
+              <div class="pos-ds">
+                <div class="pos-mon"><i class="pos-anh a1"></i><b>Cà phê đen</b><span>20.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a2"></i><b>Cà phê sữa</b><span>25.000đ</span><em>2</em></div>
+                <div class="pos-mon"><i class="pos-anh a3"></i><b>Bạc xỉu</b><span>29.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a4"></i><b>Cappuccino</b><span>39.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a5"></i><b>Latte</b><span>39.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a6"></i><b>Espresso</b><span>35.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a7"></i><b>Trà đào cam sả</b><span>35.000đ</span></div>
+                <div class="pos-mon"><i class="pos-anh a8"></i><b>Trà vải</b><span>32.000đ</span><em>1</em></div>
               </div>
             </div>
             <div class="pos-phai">
-              <div class="ban">Bàn 3</div>
-              <div class="pos-dong"><span>Cà phê sữa ×2</span><span>50.000đ</span></div>
-              <div class="pos-dong"><span>Bạc xỉu ×1</span><span>29.000đ</span></div>
-              <div class="pos-dong"><span>Trà vải ×1</span><span>22.000đ</span></div>
-              <div class="pos-tong"><span>Tổng</span><span>101.000đ</span></div>
-              <div class="pos-btn">Thu tiền</div>
+              <div class="ban">Giỏ hàng</div>
+              <div class="pos-dong"><span>Cà phê sữa</span><span>50.000đ</span></div>
+              <div class="pos-phu">Đơn giá 25.000đ/phần</div>
+              <div class="pos-dong"><span>Trà vải</span><span>37.000đ</span></div>
+              <div class="pos-phu">Thêm thạch · Ít đá</div>
+              <div class="pos-gui">Gửi bếp · 3 món mới</div>
+              <div class="pos-tong"><span>Tổng cộng · 3 món</span><span>87.000đ</span></div>
+              <div class="pos-btn">Thanh toán</div>
             </div>
           </div>
         </div>
@@ -868,19 +958,33 @@
             <span class="web-den"></span><span class="web-den"></span><span class="web-den"></span>
             <span class="web-o">py-pos — báo cáo</span>
           </div>
+          <!-- Dựng theo ĐÚNG màn Báo cáo của app: dải chip chọn kỳ, khối tóm
+               tắt nền xanh nhạt với bốn con số, biểu đồ "Doanh thu theo ngày",
+               rồi bảng "Món bán chạy". Bản trước thiếu chip kỳ và thiếu hẳn
+               bảng món bán chạy — mà đó là thứ chủ quán mở ra xem nhiều nhất. -->
           <div class="web-man">
-            <p class="web-nho" style="margin:0">Doanh thu tháng này</p>
-            <p class="web-to">2.658.900đ</p>
-            <div class="web-oi">
-              <div><span class="web-nho">Số đơn</span><b>14</b></div>
-              <div><span class="web-nho">Trung bình/đơn</span><b>189.921đ</b></div>
-              <div><span class="web-nho">Đã hủy</span><b>0</b></div>
+            <div class="web-ky"><i>Ngày</i><i class="chon">30 ngày</i><i>Tháng này</i><i>Tháng trước</i></div>
+            <div class="web-tom">
+              <p class="web-nho" style="margin:0">Doanh thu</p>
+              <p class="web-to">1.672.000đ</p>
+              <div class="web-oi">
+                <div><span class="web-nho">Số đơn</span><b>4</b></div>
+                <div><span class="web-nho">Trung bình/đơn</span><b>418.000đ</b></div>
+                <div><span class="web-nho">Đã hủy</span><b>0</b></div>
+              </div>
             </div>
+            <p class="web-nho web-nhan">Doanh thu theo ngày</p>
             <div class="cot-bd">
               <i style="height:14%"></i><i style="height:9%"></i><i style="height:22%"></i>
               <i style="height:17%"></i><i style="height:31%"></i><i style="height:24%"></i>
               <i style="height:44%"></i><i style="height:38%"></i><i style="height:58%"></i>
               <i style="height:49%"></i><i class="cao" style="height:78%"></i><i class="cao" style="height:100%"></i>
+            </div>
+            <p class="web-nho web-nhan">Món bán chạy</p>
+            <div class="web-top">
+              <div><b>1</b><span>Espresso</span><em>12 phần · 420.000đ</em></div>
+              <div><b>2</b><span>Cà phê đen</span><em>9 phần · 180.000đ</em></div>
+              <div><b>3</b><span>Cappuccino</span><em>5 phần · 225.000đ</em></div>
             </div>
           </div>
         </div>
@@ -895,14 +999,18 @@
           <div class="tab-vien">
             <div class="tab-man man">
               <div class="man-dau"><span>Sơ đồ bàn</span><span>Chủ quán</span></div>
+              <!-- Bàn đang có khách trong app KHÔNG tô xanh cả thẻ: nó có một
+                   vạch xanh ở mép trái và một dòng phụ "mấy món, mấy món chưa
+                   gửi bếp". Tô kín cả thẻ làm sơ đồ bàn trông như một bảng màu,
+                   mà thứ cần đọc nhanh là BÀN NÀO CÒN TRỐNG. -->
               <div class="tab-luoi">
                 <div class="tab-ban">Mang về</div>
-                <div class="tab-ban co">Bàn 1</div>
+                <div class="tab-ban co">Bàn 1<em>3 món · 3 chưa gửi</em></div>
                 <div class="tab-ban">Bàn 2</div>
-                <div class="tab-ban co">Bàn 3</div>
+                <div class="tab-ban co">Bàn 3<em>2 món · đã gửi</em></div>
                 <div class="tab-ban">Bàn 4</div>
                 <div class="tab-ban">Bàn 5</div>
-                <div class="tab-ban co">Bàn 6</div>
+                <div class="tab-ban co">Bàn 6<em>5 món · 1 chưa gửi</em></div>
                 <div class="tab-ban">Bàn 7</div>
                 <div class="tab-ban">Bàn 8</div>
                 <div class="tab-ban">Bàn 9</div>
@@ -1077,14 +1185,10 @@
       </div>
     </div>
 
-    <p class="ghi-chu" style="text-align:center">Đang chạy ở những kiểu quán này:</p>
-    <div class="pills">
-      <span class="pill">Cà phê take-away</span>
-      <span class="pill">Cà phê có bàn</span>
-      <span class="pill">Trà sữa</span>
-      <span class="pill">Nước ép, sinh tố</span>
-      <span class="pill">Ăn sáng, bánh</span>
-    </div>
+    <!-- Khối "Đang chạy ở những kiểu quán này" cùng dãy thẻ kiểu quán
+         (.pills) đã BỎ ngày 01/10/2026. Bỏ CẢ HAI chứ không riêng dòng chữ:
+         dãy thẻ đứng một mình, không có câu dẫn, thì không nói được nó là
+         cái gì — người đọc thấy năm cái nhãn rơi giữa trang. -->
     </div>
   </section>
 
@@ -1292,7 +1396,7 @@
              sản phẩm làm người đọc tưởng đang nói về hai thứ; mà chân trang
              là chỗ người ta dừng lại lần cuối trước khi bấm liên hệ. -->
         <p>Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp,
-        web order, báo cáo từ xa.</p>
+        máy quét mã vạch, thiết bị cầm tay.</p>
       </div>
       <div class="chan-cot">
         <b>Sản phẩm</b>

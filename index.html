@@ -55,8 +55,23 @@
     max-width: 1080px; margin: 0 auto; padding: 10px 20px;
     display: flex; align-items: center; gap: 16px;
   }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: var(--text); }
-  .brand svg { width: 30px; height: 30px; }
+  /* Logo là CHỮ HIỆU, không phải ô icon.
+
+     Ô icon vuông vốn sinh ra cho màn hình điện thoại, chỗ chỉ có một ô
+     48px và không có chỗ cho chữ. Trên trang web thì ngược lại: có cả
+     chiều ngang, mà đọc được tên thương hiệu quan trọng hơn nhận ra một
+     cái ô. Bản cũ còn tệ hơn thế — ô xanh đặt trên dải xanh đậm nên phải
+     làm mờ nó thành trắng 16%, tức logo nhòe đi đúng ở chỗ nó phải nổi
+     nhất là màn đầu tiên.
+
+     stroke="currentColor" nên CHỈ MỘT đoạn markup phục vụ cả hai màu:
+     xanh trên nền trắng, trắng trên nền tối. Hai file trong assets/brand/
+     (bản xanh và bản trắng) giống hệt nhau về hình học, chỉ khác màu nét —
+     chép cả hai vào đây là tự nhân đôi thứ phải sửa. */
+  .brand { display: flex; align-items: center; text-decoration: none; color: var(--green); }
+  .chu-hieu { height: 25px; width: auto; display: block; }
+  /* Favicon VẪN là ô icon vuông, cố ý: tab trình duyệt cao 16px, chữ hiệu
+     tỉ lệ 3,3:1 nhét vào đó thì nét 21 mỏng còn dưới một điểm ảnh. */
   .nav { margin-left: auto; display: flex; align-items: center; gap: 22px; }
   .nav a { color: var(--muted); text-decoration: none; font-size: 16px; }
   .nav a:hover { color: var(--green-dark); }
@@ -77,12 +92,10 @@
      lấy từ ba trang lớn trong ngành, và chỗ nó hơn cột-giữa là người xem
      thấy MẶT sản phẩm trước khi đọc xong câu đầu.
 
-     Cái máy ở đây vẽ bằng CSS chứ không phải một file ảnh: nó không bao
-     giờ hỏng, không phụ thuộc thư mục anh/ có ảnh hay chưa, và luôn đúng
-     cỡ. Ảnh chụp thật vẫn nằm ở khu "Nhìn thử màn hình" phía dưới. */
+     Bên phải là ảnh bộ thiết bị, nền trong suốt — xem khối .hero-anh. */
   .hero { padding: 56px 0 44px; }
   .hero-in { display: grid; grid-template-columns: 1.08fr .92fr; gap: 44px; align-items: center; }
-  .logo { width: 56px; height: 56px; }
+  .chu-hieu-to { height: 42px; margin-bottom: 20px; }
   /* text-wrap: balance để tiêu đề đừng bỏ lại một chữ đứng lẻ ở dòng cuối.
      Trình duyệt cũ không hiểu thì ngắt dòng như trước, không hỏng gì. */
   h1 { font-size: 42px; line-height: 1.14; margin: 14px 0 12px; letter-spacing: -.5px; text-wrap: balance; }
@@ -92,56 +105,67 @@
      "15+ năm kinh nghiệm" — mình chưa có mấy số đó, mà bịa ra thì mất cả
      trang. Nên dùng đúng cái khuôn đó với những số mình TỰ quyết được:
      chính sách giá và thời gian mở quán. Kiểm được, và không ai bắt được. */
-  .so-lieu {
+  /* Bốn điều nổi bật. Trước là bốn CON SỐ nên cỡ chữ to kèm dòng phụ bên
+     dưới; giờ là bốn CÂU nên chỉ cần một dấu tích và một dòng — đặt câu ở
+     cỡ 25px như con số cũ thì bốn ô chật cứng, chữ vỡ dòng. */
+  .noi-bat {
+    list-style: none; padding: 0;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 24px; margin-top: 28px;
+    gap: 14px 24px; margin: 28px 0 0;
     padding-top: 22px; border-top: 1px solid var(--line);
   }
-  .so-lieu b { display: block; font-size: 25px; letter-spacing: -.5px; line-height: 1.2; }
-  .so-lieu span { color: var(--muted); font-size: 15px; }
+  .noi-bat li {
+    position: relative; padding-left: 27px;
+    font-size: 16px; font-weight: 600; line-height: 1.4;
+  }
+  /* Dấu tích vẽ bằng SVG nhúng thẳng vào CSS, KHÔNG dùng ký tự "✓": ký tự
+     đó mỗi hệ điều hành vẽ một kiểu, trên Android ra nét mảnh khác hẳn nét
+     của trang, mà đây là chỗ khách Việt xem nhiều nhất. */
+  .noi-bat li::before {
+    content: ""; position: absolute; left: 0; top: 3px;
+    width: 18px; height: 18px; border-radius: 999px;
+    background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+  }
 
-  /* ---------- khung máy vẽ bằng CSS ---------- */
-  .may-khung {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 16px;
-  }
+  /* ---------- khung điện thoại ---------- */
+  /* Khung máy giờ ôm một ẢNH CHỤP THẬT nên bỏ padding: ảnh phải chạm sát
+     viền như màn hình thật. overflow ẩn để bốn góc ảnh bo theo viền máy. */
   .may {
-    width: 258px; border: 9px solid #1A1C19; border-radius: 32px;
-    background: var(--surface); padding: 14px 13px 16px;
-    box-shadow: 0 18px 40px rgba(26, 28, 25, .14);
+    width: 236px; border: 9px solid #1A1C19; border-radius: 30px;
+    background: #1A1C19; overflow: hidden; line-height: 0;
+    box-shadow: 0 18px 40px rgba(26, 28, 25, .18);
   }
-  .may-dau {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 12px;
+  /* Cắt HAI đầu ảnh, cả hai đều là giao diện của Android chứ không phải của
+     sản phẩm: thanh trạng thái trên (giờ "22:36", vạch sóng, pin của MÁY TÔI
+     CHỤP) và thanh vuốt dưới. Để nguyên thì trang trông như ảnh chụp vội.
+
+     Cắt bằng CSS chứ không cắt file, để lần sau đổi ý còn sửa được. Hai con
+     số dưới đây đi LIỀN NHAU, đổi một cái là phải tính lại cái kia:
+
+       ảnh gốc 1080x2400 (9/20). Khung 9/18.7 nên bỏ đi 6,5% chiều cao.
+       Thanh trên chiếm ~4%, thanh dưới ~2,5% → 4/6,5 = 62%.
+
+     object-position tính theo tỉ lệ phần BỊ CẮT, không phải theo ảnh: 0% là
+     dán mép trên (cắt sạch phía dưới), 100% là dán mép dưới. Đặt 4% như bản
+     đầu nên gần như cắt hết ở dưới và thanh trạng thái vẫn còn nguyên. */
+  .may img {
+    width: 100%; aspect-ratio: 9 / 18.7;
+    /* height:auto BẮT BUỘC. Thẻ img có width="1080" height="2400" để trình
+       duyệt chừa sẵn chỗ, tránh giật bố cục lúc ảnh chưa tải. Nhưng thuộc
+       tính height đó thành gợi ý kích thước, mà aspect-ratio CHỈ tính chiều
+       còn thiếu khi chiều kia là auto — thiếu dòng này thì ảnh cao đúng
+       2400px thật, đẩy hero dài ra hai nghìn rưởi điểm ảnh. Đã dính. */
+    height: auto;
+    object-fit: cover; object-position: center 62%;
+    display: block;
   }
-  .may-dau b { font-size: 17px; }
-  .may-dau span { color: var(--muted); font-size: 13px; }
-  .may-hang {
-    display: flex; justify-content: space-between; gap: 10px;
-    padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 14px;
-  }
-  .may-hang i { font-style: normal; color: var(--muted); }
-  .may-tong {
-    display: flex; justify-content: space-between;
-    margin: 14px 0 0; font-size: 16px; font-weight: 700;
-  }
-  .may-nut {
-    margin-top: 14px; background: var(--green); color: #fff;
-    border-radius: 11px; text-align: center; padding: 11px;
-    font-weight: 600; font-size: 15px;
-  }
-  /* Thẻ nổi đè lên góc máy: nói đúng cái khác biệt của sản phẩm (mất mạng
-     vẫn bán) tại đúng lúc mắt đang ở trên cái máy. */
-  .may-the {
-    width: 276px; /* đúng bề ngang cái máy kể cả viền */
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 12px; padding: 11px 15px; box-shadow: var(--shadow);
-    font-size: 14px; font-weight: 600;
-  }
-  .may-the em { display: block; font-style: normal; font-weight: 400; color: var(--muted); font-size: 13px; }
-  .may-den {
-    display: inline-block; width: 8px; height: 8px; border-radius: 999px;
-    background: var(--green); margin-right: 7px; vertical-align: 1px;
-  }
+  /* Các lớp .may-dau / .may-hang / .may-tong / .may-nut đã BỎ ngày
+     30/09/2026 cùng cái máy vẽ bằng CSS. Muốn dựng lại màn giả thì xem lịch
+     sử git — nhưng cân nhắc kỹ: màn vẽ lại bao giờ cũng đẹp hơn app thật, và
+     khách đang cân nhắc bỏ tiền thì nhận ra điều đó. */
+  /* Thẻ nổi "Không có mạng" (.may-the / .may-den) đã BỎ ngày 30/09/2026
+     cùng lúc đưa cụm thiết bị vào hero: dải bốn thẻ ngay dưới hero đã có
+     "Mất mạng vẫn bán" rồi, mà cụm đã năm món, thêm một thẻ nữa là rối. */
 
   .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
   .btn {
@@ -157,6 +181,21 @@
      xem lại lịch sử git — nhưng cân nhắc kỹ, vì một nút bấm không ra gì là
      cách nhanh nhất mất lòng tin ngay ở trang đầu. */
 
+
+  /* ---------- ảnh bộ thiết bị ở hero ----------
+
+     Ảnh WebP CÓ KÊNH TRONG SUỐT nên KHÔNG bo góc và KHÔNG dùng box-shadow:
+     box-shadow đổ bóng theo hình chữ nhật của thẻ, mà thẻ ở đây phần lớn là
+     trong suốt — sẽ ra một cái khung vuông lơ lửng quanh bộ máy.
+
+     drop-shadow của filter thì bám theo ĐƯỜNG VIỀN THẬT của pixel đục, nên
+     bóng ôm đúng hình bộ máy. Để nhạt thôi: ảnh đã có bóng sẵn của chính nó,
+     chồng thêm một lớp đậm nữa là ra hai bóng lệch nhau. */
+  .hero-anh { margin: 0; max-width: 520px; margin-left: auto; }
+  .hero-anh img {
+    width: 100%; height: auto; display: block;
+    filter: drop-shadow(0 14px 22px rgba(10, 14, 9, .28));
+  }
   /* ---------- dải điểm mạnh ---------- */
   .strip {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -191,12 +230,32 @@
   /* Thẻ NỀN SÁNG nằm trong dải tối phải lấy lại màu chữ của nó. Không làm
      việc này thì chữ trong thẻ thừa hưởng color:#fff của cả dải → trắng
      trên trắng, mất hẳn. Đã dính đúng vậy ở cái máy trên hero. */
-  .bang-toi .may, .bang-toi .may-the, .bang-toi .offline { color: var(--text); }
-  /* Ô logo: nền của nó cũng màu xanh brand nên trên dải tối thì chìm. Đổi
-     thành ô trắng mờ, chữ PY vẫn trắng. */
-  .bang-toi .logo rect { fill: rgba(255,255,255,.16); }
-  .bang-toi .so-lieu { border-top-color: rgba(255,255,255,.22); }
-  .bang-toi .so-lieu span { color: rgba(255,255,255,.76); }
+  /* Trả màu chữ về đen cho MỌI màn hình giả nằm trong dải tối.
+
+     .bang-toi đặt color:#fff cho cả khối, mà bên trong lại có những cái
+     thẻ nền TRẮNG — chữ trắng trên nền trắng thì biến mất hoàn toàn, không
+     có lỗi nào báo ra, và chỉ phát hiện được bằng mắt.
+
+     Đã dính HAI lần. Lần đầu ở .may. Lần hai ngày 30/09 khi thử đưa khung
+     POS và tablet vào hero — chúng vốn chỉ sống ở dải TRẮNG (#may-nao) nên
+     không ai ngờ, kết quả là máy POS chỉ còn thấy giá, mất sạch tên món, ô
+     đơn hàng trống trơn. (Cụm đó sau thay bằng ảnh ghép nên không còn ở
+     đây nữa, nhưng cái bẫy thì vẫn còn nguyên.)
+
+     Quy tắc rút ra: thêm bất kỳ màn hình giả nào vào dải tối thì PHẢI thêm
+     tên lớp của nó vào luật này. */
+  .bang-toi .may, .bang-toi .offline { color: var(--text); }
+  /* Chữ hiệu đổi màu bằng currentColor — trên dải tối chỉ cần đổi color.
+     Bản trước phải làm mờ ô icon thành trắng 16%, tức logo nhòe đi đúng ở
+     chỗ nó phải nổi nhất. */
+  .bang-toi .chu-hieu { color: #fff; }
+  .bang-toi .noi-bat { border-top-color: rgba(255,255,255,.22); }
+  /* Trên nền xanh đậm, chấm tích màu brand chìm hẳn — đảo thành nền trắng,
+     dấu tích màu xanh. */
+  .bang-toi .noi-bat li::before {
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232E7D32' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+  }
   .bang-toi .btn-secondary {
     background: rgba(255,255,255,.14); color: #fff;
     border-color: rgba(255,255,255,.42);
@@ -287,27 +346,10 @@
   .step p { margin: 0; color: var(--muted); font-size: 16px; }
 
   /* ---------- ảnh app ---------- */
-  /* Cột bó ở 240px, KHÔNG phải 1fr: ảnh chụp điện thoại rất cao (1080×2400),
-     nên một cột rộng 470px là cái khung cao gần một mét rưỡi chiếm hết màn.
-     Bó lại rồi căn giữa thì khung luôn đúng cỡ một cái điện thoại, dù trang
-     có 1 ảnh hay 4 ảnh. */
-  .dan-anh {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 220px));
-    gap: 18px; align-items: start; justify-content: center;
-  }
-  .dienthoai { margin: 0; text-align: center; }
-  /* Khung điện thoại vẽ bằng CSS, không phải một file ảnh khung: ảnh chụp
-     nằm trong khung thì người xem đọc ra ngay "đây là app trên máy", mà
-     không phải tải thêm gì. */
-  .dienthoai img {
-    display: block; width: 100%; border-radius: 18px;
-    border: 6px solid #1A1C19; background: var(--surface);
-    box-shadow: var(--shadow);
-  }
-  .dienthoai figcaption {
-    margin-top: 10px; color: var(--muted); font-size: 15px; font-weight: 600;
-  }
-
+  /* Khu "Nhìn thử màn hình" (.dan-anh / .dienthoai — bốn ảnh chụp app trong
+     khung điện thoại) đã BỎ ngày 30/09/2026 theo yêu cầu, cùng với đoạn JS
+     tự ẩn khu đó khi chưa có ảnh. Bốn file ảnh vẫn nằm trong anh/ và vẫn
+     được mấy mục khác dùng. Xem lịch sử git nếu cần dựng lại. */
 
   /* ---------- dãy thiết bị ---------- */
   /* Khung máy vẽ bằng HTML + CSS, không phải ảnh chụp. Xem README để biết
@@ -503,6 +545,89 @@
   .chan-cot a:hover { color: var(--green-dark); }
   .chan-cuoi { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); }
 
+
+  /* ================= CHUYỂN ĐỘNG =================
+
+     Trước bản này trang KHÔNG có một dòng transition nào — nút đổi màu
+     tức thì, mọi khối hiện ra cùng một lúc. Đó chính là thứ làm trang
+     trông "thô" dù nội dung và bố cục đã ổn.
+
+     Nguyên tắc đi theo: chuyển động để DẪN MẮT, không để biểu diễn.
+     Khách của trang này là chủ quán cà phê, đọc trên điện thoại bằng 3G,
+     buổi tối sau khi đóng cửa. Hiệu ứng nặng làm họ chờ chứ không làm họ
+     tin. */
+
+  /* --- 1. Mượt khi chạm --- */
+  .btn {
+    transition: background-color .18s ease, color .18s ease,
+                transform .18s ease, box-shadow .18s ease;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(26,28,25,.13); }
+  /* Nhấn xuống thì trả về ngay: nút nhấc lên mà bấm vẫn thấy nhấc là cảm
+     giác bấm không ăn. */
+  .btn:active { transform: translateY(0); box-shadow: none; }
+  .nav a, .chan-cot a, .goi-toi a, .tai-play a { transition: color .18s ease, opacity .18s ease; }
+
+  .card, .step, .goi, .pill {
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .card:hover, .step:hover, .goi:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 2px 4px rgba(26,28,25,.05), 0 14px 32px rgba(26,28,25,.10);
+  }
+  .pill:hover { transform: translateY(-2px); border-color: var(--green); }
+
+  /* Thanh trên chỉ đổ bóng KHI đã cuộn. Đổ bóng sẵn từ đầu thì nó tách
+     khỏi hero ngay lúc chưa có gì trôi lên dưới nó. */
+  .top { transition: box-shadow .25s ease; }
+  .top.troi { box-shadow: 0 2px 16px rgba(26,28,25,.09); }
+
+  /* --- 2. Hiện dần khi cuộn tới ---
+
+     Lớp .len chỉ ẩn khi <html> CÓ .js, mà .js do chính JS gắn vào. JS
+     lỗi hoặc bị tắt thì không lớp nào được gắn → trang hiện đủ nội dung
+     ngay. Đây là cái bẫy kinh điển của reveal-on-scroll: viết opacity:0
+     thẳng vào CSS thì một lỗi JS biến cả trang thành tờ giấy trắng, mà
+     lúc đó không ai đoán ra vì sao. */
+  .js .len {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .55s ease, transform .55s cubic-bezier(.22,.7,.3,1);
+  }
+  .js .len.hien { opacity: 1; transform: none; }
+
+  /* --- 3. Hero vào khi mở trang --- */
+  @keyframes vao-len {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes vao-phai {
+    from { opacity: 0; transform: translateX(28px); }
+    to   { opacity: 1; transform: none; }
+  }
+  /* backwards để phần tử ẩn SẴN trong lúc chờ delay. Thiếu nó thì mọi
+     thứ loé lên một nhịp rồi mới biến đi để chạy hiệu ứng. */
+  .js .hero-chu > * { animation: vao-len .7s cubic-bezier(.22,.7,.3,1) backwards; }
+  .js .hero-chu > .chu-hieu { animation-delay: .05s; }
+  .js .hero-chu > h1        { animation-delay: .14s; }
+  .js .hero-chu > .tagline  { animation-delay: .23s; }
+  .js .hero-chu > .cta      { animation-delay: .32s; }
+  .js .hero-chu > .noi-bat  { animation-delay: .41s; }
+  .js .hero-anh { animation: vao-phai .8s cubic-bezier(.22,.7,.3,1) .3s backwards; }
+
+
+  /* --- 5. Tắt hết khi người dùng xin ít chuyển động ---
+
+     Không phải tùy chọn cho đẹp: có người xem trang này bị chóng mặt do
+     rối loạn tiền đình, và họ đã bật sẵn cờ đó trong hệ điều hành. Bỏ qua
+     nó là làm họ không đọc nổi trang. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .js .len, .js .len.hien { opacity: 1; transform: none; transition: none; }
+    .js .hero-chu > *, .js .hero-anh { animation: none; }
+    .btn:hover, .card:hover, .step:hover, .goi:hover, .pill:hover {
+      transform: none; box-shadow: var(--shadow);
+    }
+  }
   /* Hero xếp một cột sớm hơn mốc điện thoại: để hai cột tới 760px thì cột
      chữ chưa được 30 ký tự một dòng, tiêu đề vỡ thành năm dòng. */
   @media (max-width: 700px) {
@@ -513,8 +638,20 @@
     .hero-chu { text-align: center; }
     .hero-chu .tagline { margin-inline: auto; }
     .cta { justify-content: center; }
-    .so-lieu { max-width: 460px; margin-inline: auto; text-align: center; }
-    .may-khung { align-items: center; }
+    /* Căn giữa cả KHỐI nhưng chữ bên trong vẫn căn TRÁI. Ở mốc này
+       .hero-chu đã bật text-align:center cho cả cột, mà để nó ăn vào đây
+       thì dòng thứ hai của câu dài nằm giữa trong khi dấu tích đứng mãi
+       bên trái — nhìn như chữ rơi khỏi dấu. */
+    .noi-bat { max-width: 430px; margin-inline: auto; }
+    .noi-bat li { text-align: left; }
+    /* Một cột thì ảnh nằm GIỮA. margin-left:auto là để nó dạt phải khi hero
+       hai cột; ở đây phải ghi đè, không thì ảnh lệch hẳn sang mép phải trong
+       khi chữ đã căn giữa. */
+    .hero-anh { margin-inline: auto; }
+    /* Và đổi hiệu ứng vào: trượt từ PHẢI chỉ hợp khi ảnh đứng ở cột bên phải.
+       Ở một cột, ảnh đã rộng gần hết bề ngang nên trượt ngang làm nó nhô ra
+       quá mép màn 28px trong lúc chạy. Trượt từ dưới lên không có chuyện đó. */
+    .js .hero-anh { animation-name: vao-len; }
     .chan { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 560px) {
@@ -527,12 +664,14 @@
     .nav a:not(.btn) { display: none; }
     .btn { display: block; width: 100%; text-align: center; }
     .top .btn { display: inline-block; width: auto; padding: 8px 14px; font-size: 14px; }
-    .so-lieu { gap: 16px 24px; }
-    .so-lieu b { font-size: 22px; }
+    /* MỘT cột trên điện thoại. Hai cột ở bề ngang này chỉ còn ~158px mỗi
+       ô, đủ để "Không % doanh thu" vỡ làm hai dòng với mỗi chữ "thu" đứng
+       một mình. Bốn dòng cao hơn hai dòng thật, nhưng đọc trôi hơn hẳn. */
+    .noi-bat { grid-template-columns: 1fr; gap: 10px; max-width: 280px; }
+    .noi-bat li { font-size: 15px; }
     /* Ba máy còn lại cũng xếp một cột: để hai cột thì cái tablet bị bó
        xuống 152px, nhỏ hơn cả cái điện thoại đứng bên cạnh nó. */
     .tb-duoi { grid-template-columns: 1fr; gap: 34px; }
-    .may-the { width: 100%; max-width: 276px; }
   }
 </style>
 </head>
@@ -540,12 +679,18 @@
 
 <div class="top">
   <div class="top-in">
-    <a class="brand" href="#">
-      <svg viewBox="0 0 100 100" role="img" aria-label="PY POS">
-        <rect width="100" height="100" rx="22" fill="#2E7D32"/>
-        <path fill="#fff" fill-rule="evenodd" d="M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z"/>
+    <a class="brand" href="#" aria-label="PY POS — về đầu trang">
+      <svg class="chu-hieu" viewBox="-12.5 -9.5 398.84 122"
+           role="img" aria-label="PY POS">
+        <g fill="none" stroke="currentColor" stroke-width="21"
+           stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 11,100 L 11,3 L 27,3 A 26,26 0 0 1 27,55 L 11,55"/>
+          <g transform="translate(67,0)"><path d="M 4,3 L 27,54 L 50,3 M 27,54 L 27,100"/></g>
+          <g transform="translate(168,0)"><path d="M 11,100 L 11,3 L 27,3 A 26,26 0 0 1 27,55 L 11,55"/></g>
+          <g transform="translate(235,0)"><ellipse cx="36" cy="51.5" rx="36" ry="48.5"/></g>
+          <g transform="translate(322,0)"><path d="M 48.37,15.13 A 25.92,24.25 0 1 0 25.92,51.5 A 25.92,24.25 0 1 1 3.47,87.88"/></g>
+        </g>
       </svg>
-      PY POS
     </a>
     <nav class="nav">
       <a href="#giai-phap">Giải pháp</a>
@@ -554,7 +699,7 @@
       <a href="#gia">Giá</a>
       <a href="#bat-dau">Bắt đầu</a>
       <a href="#cau-hoi">Câu hỏi</a>
-      <a class="btn btn-primary btn-nho nav-cta" href="https://zalo.me/0934773909">Nhận bản dùng thử</a>
+      <a class="btn btn-primary btn-nho nav-cta" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Dùng thử miễn phí</a>
     </nav>
   </div>
 </div>
@@ -563,45 +708,63 @@
   <div class="wrap">
     <div class="hero-in">
       <div class="hero-chu">
-        <svg class="logo" viewBox="0 0 100 100" role="img" aria-label="PY POS">
-          <rect width="100" height="100" rx="22" fill="#2E7D32"/>
-          <path fill="#fff" fill-rule="evenodd" d="M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z"/>
-        </svg>
-        <h1>Bộ giải pháp bán hàng cho quán cà phê và trà sữa</h1>
-        <p class="tagline">Máy bán hàng, màn hình bếp, web order, báo cáo từ xa.
-        Mất mạng vẫn bán được.</p>
+      <svg class="chu-hieu chu-hieu-to" viewBox="-12.5 -9.5 398.84 122"
+           role="img" aria-label="PY POS">
+        <g fill="none" stroke="currentColor" stroke-width="21"
+           stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 11,100 L 11,3 L 27,3 A 26,26 0 0 1 27,55 L 11,55"/>
+          <g transform="translate(67,0)"><path d="M 4,3 L 27,54 L 50,3 M 27,54 L 27,100"/></g>
+          <g transform="translate(168,0)"><path d="M 11,100 L 11,3 L 27,3 A 26,26 0 0 1 27,55 L 11,55"/></g>
+          <g transform="translate(235,0)"><ellipse cx="36" cy="51.5" rx="36" ry="48.5"/></g>
+          <g transform="translate(322,0)"><path d="M 48.37,15.13 A 25.92,24.25 0 1 0 25.92,51.5 A 25.92,24.25 0 1 1 3.47,87.88"/></g>
+        </g>
+      </svg>
+        <h1>Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê</h1>
+        <p class="tagline">Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp,
+        web order, báo cáo từ xa.</p>
 
+        <!-- Nút CHÍNH giờ là tải app, nút phụ là Zalo — đảo so với bản trước.
+             Bản trước để Zalo làm nút chính vì app trên Play miễn phí mà trang
+             này bán gói Quầy 7 triệu, đưa "tải miễn phí" lên trước là tự cắt
+             đường bán hàng. Chủ dự án chốt đảo lại ngày 30/09: cho tải thử
+             trước, bán sau. Mâu thuẫn mô hình kinh doanh vẫn còn nguyên, chỉ
+             là chọn ưu tiên khác — xem README. -->
         <div class="cta">
-          <a class="btn btn-primary" href="https://zalo.me/0934773909">Nhận bản dùng thử</a>
-          <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Tải trên Google Play</a>
+          <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Dùng thử miễn phí</a>
+          <a class="btn btn-secondary" href="https://zalo.me/0934773909">Liên hệ tư vấn</a>
         </div>
 
-        <!-- Bốn số này đều là thứ mình TỰ quyết, nên nói bao nhiêu lần cũng
-             không sợ bị bắt: chính sách giá, và thời gian mở quán. Cố ý
-             không có "bao nhiêu quán đang dùng" — chưa có số đó. -->
-        <div class="so-lieu">
-          <div><b>0đ</b><span>phí hàng tháng</span></div>
-          <div><b>0%</b><span>cắt trên doanh thu</span></div>
-          <div><b>15 phút</b><span>là bán được đơn đầu</span></div>
-          <div><b>4 loại máy</b><span>điện thoại, tablet, POS, máy tính</span></div>
-        </div>
+        <!-- Bốn điều này đều là thứ mình TỰ quyết hoặc tự làm được, nên nói
+             bao nhiêu lần cũng không sợ bị bắt bẻ. Cố ý KHÔNG có "bao nhiêu
+             quán đang dùng" — chưa có con số đó, mà bịa ra thì gặp khách hỏi
+             tên quán là hết đường lui.
+
+             Trước đây khối này là bốn CON SỐ (0đ, 0%, 15 phút, 4 loại máy) nên
+             có hiệu ứng đếm tăng. Giờ là bốn CÂU nên đã bỏ hiệu ứng đó cùng
+             với đoạn JS đếm — không để lại mã chết. -->
+        <ul class="noi-bat">
+          <li>Giao diện đơn giản</li>
+          <li>Không % doanh thu</li>
+          <li>Tính năng theo yêu cầu</li>
+          <li>Hỗ trợ nhiều nền tảng</li>
+        </ul>
       </div>
 
-      <!-- Cái máy này vẽ bằng HTML + CSS, không phải ảnh: không tải thêm
-           gì, không hỏng, và sửa con số trong đó là sửa chữ chứ không
-           phải chụp lại màn. Số liệu để đúng lối tiền của app. -->
-      <div class="may-khung" aria-hidden="true">
-        <div class="may">
-          <div class="may-dau"><b>Bàn 3</b><span>4 phần</span></div>
-          <div class="may-hang"><span>Cà phê sữa <i>×2</i></span><span>40.000đ</span></div>
-          <div class="may-hang"><span>Trà đào <i>×1</i></span><span>30.000đ</span></div>
-          <div class="may-hang"><span>Bạc xỉu <i>×1</i></span><span>25.000đ</span></div>
-          <div class="may-tong"><span>Tổng</span><span>95.000đ</span></div>
-          <div class="may-nut">Thu tiền</div>
-        </div>
-        <div class="may-the"><span class="may-den"></span>Không có mạng
-        <em>Vẫn bán, vẫn in bill, vẫn trừ kho</em></div>
-      </div>
+      <!-- Ảnh bộ thiết bị do chủ dự án cung cấp: máy POS, điện thoại, két
+           tiền, máy in tem, máy in hóa đơn — mỗi máy hiện một màn thật của
+           app (POS màn bán hàng, điện thoại màn báo cáo), và máy in đang nhả
+           tờ hóa đơn.
+
+           WebP có kênh trong suốt nên ảnh thả thẳng lên dải xanh, không có
+           khung chữ nhật. Vì vậy KHÔNG bo góc và KHÔNG dùng box-shadow —
+           xem khối .hero-anh trong CSS để biết lý do.
+
+           Trước bản này chỗ đây là một máy POS vẽ bằng CSS bọc ảnh chụp màn
+           (lớp .quay-*). Đã bỏ hẳn cùng ảnh anh/man-ban-hang.png. -->
+      <figure class="hero-anh">
+        <img src="anh/bo-thiet-bi.webp" width="963" height="641"
+             alt="Bộ thiết bị PY POS: máy POS màn cảm ứng đang mở màn bán hàng của Bàn 1 với menu đồ uống và giỏ hàng 208.000đ, điện thoại hiện màn báo cáo doanh thu, két đựng tiền, máy in tem và máy in hóa đơn đang nhả hóa đơn thanh toán">
+      </figure>
     </div>
     </div>
   </div>
@@ -845,30 +1008,6 @@
        tải ảnh nằm trong khối đang display:none, nên lazy + khu ẩn là một
        vòng chết — khu chờ ảnh tải xong mới hiện, ảnh chờ khu hiện mới tải.
        Đã dính đúng cái đó lúc dựng. -->
-  <section id="anh-app" class="anh-app" hidden>
-    <div class="wrap">
-    <h2>Nhìn thử màn hình</h2>
-    <p class="lead">Ảnh chụp thật từ app đang chạy.</p>
-    <div class="dan-anh">
-      <figure class="dienthoai">
-        <img src="anh/so-do-ban.png" alt="Sơ đồ bàn: bàn nào đang có khách, bàn nào đã gọi món">
-        <figcaption>Sơ đồ bàn</figcaption>
-      </figure>
-      <figure class="dienthoai">
-        <img src="anh/chon-mon.png" alt="Màn chọn món với danh mục và số phần đã gọi">
-        <figcaption>Chọn món</figcaption>
-      </figure>
-      <figure class="dienthoai">
-        <img src="anh/thanh-toan.png" alt="Màn thanh toán với tiền khách đưa và tiền thối">
-        <figcaption>Thanh toán</figcaption>
-      </figure>
-      <figure class="dienthoai">
-        <img src="anh/bao-cao.png" alt="Báo cáo doanh thu theo ngày và món bán chạy">
-        <figcaption>Báo cáo</figcaption>
-      </figure>
-    </div>
-    </div>
-  </section>
 
   <section id="chu-quan" class="bang-trang">
     <div class="wrap">
@@ -938,8 +1077,7 @@
       </div>
     </div>
 
-    <p class="ghi-chu" style="text-align:center">Ảnh minh họa. Đang chạy ở
-    những kiểu quán này:</p>
+    <p class="ghi-chu" style="text-align:center">Đang chạy ở những kiểu quán này:</p>
     <div class="pills">
       <span class="pill">Cà phê take-away</span>
       <span class="pill">Cà phê có bàn</span>
@@ -976,7 +1114,7 @@
           <li class="khong">Web order cho khách</li>
           <li class="khong">Nhiều chi nhánh</li>
         </ul>
-        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Hỏi gói này</a>
+        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
       </div>
       <div class="goi goi-nhan">
         <p class="goi-huy">Quán chọn nhiều nhất</p>
@@ -994,7 +1132,7 @@
           <li class="khong">Web order cho khách</li>
           <li class="khong">Nhiều chi nhánh</li>
         </ul>
-        <a class="btn btn-primary" href="https://zalo.me/0934773909">Hỏi gói này</a>
+        <a class="btn btn-primary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
       </div>
       <div class="goi">
         <h3>Chuỗi</h3>
@@ -1011,7 +1149,7 @@
           <li class="co">Web order cho khách</li>
           <li class="co">Nhiều chi nhánh, báo cáo tổng</li>
         </ul>
-        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Hỏi gói này</a>
+        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
       </div>
     </div>
 
@@ -1107,10 +1245,12 @@
 
     <details>
       <summary>Tôi xem báo cáo ở đâu?</summary>
-      <p>Trên chính điện thoại bán hàng, hoặc mở
-      <a href="https://trancaoviet7514.github.io/py-pos-bao-cao/">trang báo cáo</a>
-      bằng điện thoại riêng của bạn — không cần cài thêm gì, đăng nhập bằng
-      tài khoản quán là thấy số.</p>
+      <!-- Bỏ đường dẫn tới trang báo cáo ngày 30/09/2026. Câu trả lời giữ
+           nguyên vì tính năng vẫn có thật — chỉ là không mời khách chưa mua
+           bấm vào một trang đòi đăng nhập. -->
+      <p>Trên chính điện thoại bán hàng, hoặc mở trang báo cáo trên web bằng
+      điện thoại riêng của bạn — không cần cài thêm gì, đăng nhập bằng tài
+      khoản quán là thấy số.</p>
     </details>
 
     <details>
@@ -1124,7 +1264,7 @@
   <section id="lien-he" class="bang-toi">
     <div class="wrap">
     <div class="contact-in">
-      <h2>Muốn dùng thử?</h2>
+      <h2>Cần tư vấn thêm?</h2>
       <!-- Câu cũ: "App đang chạy thật ở quán và sắp lên Google Play. Nhắn
            cho tôi để nhận bản dùng thử và góp ý thêm cho quán của bạn."
            Đó là giọng của một bản thử nghiệm đang xin ý kiến — đứng ngay
@@ -1148,8 +1288,11 @@
     <div class="chan">
       <div>
         <b>PY POS</b>
-        <p>Bộ giải pháp bán hàng cho quán cà phê và trà sữa ở Việt Nam.
-        Trả một lần, dùng mãi.</p>
+        <!-- Giữ ĐÚNG câu phụ đề ở đầu trang. Hai câu khác nhau cho cùng một
+             sản phẩm làm người đọc tưởng đang nói về hai thứ; mà chân trang
+             là chỗ người ta dừng lại lần cuối trước khi bấm liên hệ. -->
+        <p>Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp,
+        web order, báo cáo từ xa.</p>
       </div>
       <div class="chan-cot">
         <b>Sản phẩm</b>
@@ -1170,49 +1313,98 @@
         <b>Liên hệ</b>
         <a href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Tải trên Google Play</a>
         <a href="https://zalo.me/0934773909">Zalo 0934 773 909</a>
-        <a href="https://trancaoviet7514.github.io/py-pos-bao-cao/">Trang xem báo cáo</a>
       </div>
     </div>
-    <div class="chan-cuoi">PY POS — phần mềm làm ở Việt Nam, cho quán ở Việt Nam.</div>
+    <div class="chan-cuoi">PY POS — phần mềm Việt cho quán Việt.</div>
     </div>
   </footer>
 
+
+
 <script>
-  // Khu ảnh chỉ hiện khi có ít nhất MỘT ảnh tải được.
+// ================= CHUYỂN ĐỘNG =================
+//
+// Gắn .js NGAY, đồng bộ, trước khi trình duyệt vẽ khung đầu tiên. CSS chỉ
+// ẩn phần tử khi <html> có lớp này, nên nếu đoạn script này không chạy thì
+// trang vẫn hiện đủ nội dung. Đặt trong DOMContentLoaded là sai: lúc đó
+// trang đã vẽ một lần rồi, và người dùng thấy nội dung loé lên rồi biến đi.
+(function () {
+  var goc = document.documentElement;
+  goc.classList.add("js");
+
+  var itChuyenDong = window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- Bóng thanh trên khi đã cuộn ----------
+  var thanh = document.querySelector(".top");
+  if (thanh) {
+    var doiBong = function () {
+      thanh.classList.toggle("troi", window.scrollY > 8);
+    };
+    doiBong();
+    addEventListener("scroll", doiBong, { passive: true });
+  }
+
+  // ---------- Hiện dần khi cuộn tới ----------
   //
-  // Trang này được gửi cho chủ quán xem, và hay được mở ra giữa lúc demo.
-  // Ảnh chưa kịp đưa vào mà trang đã hiện bốn khung rỗng — hoặc tệ hơn,
-  // bốn icon ảnh lỗi — thì người xem đọc ra là app còn dở, không đọc ra là
-  // ảnh chưa cập nhật. Nên mặc định khu này ẩn, và chỉ tự hiện ra khi thật
-  // sự có ảnh.
-  (function () {
-    var khu = document.getElementById("anh-app");
-    if (!khu) return;
-    var anh = khu.querySelectorAll("img");
-    var conLai = anh.length;
-    var coAnh = false;
+  // Người dùng xin ít chuyển động, hoặc máy cũ không có IntersectionObserver:
+  // bỏ hẳn hiệu ứng. Gỡ .js ra là mọi phần tử trở về hiện bình thường —
+  // thà không có hiệu ứng còn hơn có một trang trắng.
+  if (itChuyenDong || !("IntersectionObserver" in window)) {
+    goc.classList.remove("js");
+    return;
+  }
 
-    function xong() {
-      if (--conLai > 0) return;
-      if (coAnh) khu.hidden = false;
+  // Khung lưới thì hiện TỪNG Ô để có nhịp; khối thường hiện cả khối. Hiện
+  // cả cái lưới một lúc thì bốn thẻ nhảy lên cùng nhau, nhìn như một cục.
+  var LUOI = ".grid, .steps, .bang-gia, .pills, .tb-duoi, .strip";
+  var khoi = [];
+  document.querySelectorAll("section > .wrap > *").forEach(function (el) {
+    if (el.matches(LUOI)) {
+      for (var i = 0; i < el.children.length; i++) khoi.push(el.children[i]);
+    } else {
+      khoi.push(el);
     }
+  });
 
-    Array.prototype.forEach.call(anh, function (o) {
-      // Ảnh nào không có thì bỏ hẳn khung của nó, đừng để lại chỗ trống.
-      function hong() {
-        var khung = o.parentNode;
-        if (khung && khung.parentNode) khung.parentNode.removeChild(khung);
-        xong();
-      }
-      if (o.complete) {
-        if (o.naturalWidth > 0) { coAnh = true; xong(); } else { hong(); }
-        return;
-      }
-      o.addEventListener("load", function () { coAnh = true; xong(); });
-      o.addEventListener("error", hong);
+  khoi.forEach(function (el) { el.classList.add("len"); });
+
+  // Trễ theo vị trí trong hàng ngang, chặn ở 260ms: lưới sáu ô mà mỗi ô trễ
+  // thêm 65ms thì ô cuối chờ gần nửa giây — người cuộn nhanh đã đi qua mất
+  // rồi mới thấy nó hiện.
+  khoi.forEach(function (el) {
+    var thuTu = Array.prototype.indexOf.call(el.parentNode.children, el);
+    el.style.transitionDelay = Math.min(thuTu * 65, 260) + "ms";
+  });
+
+  // Khối đã Ở TRÊN khung nhìn ngay lúc mở trang thì hiện luôn, không chờ
+  // observer. Xảy ra khi mở bằng đường dẫn có neo (pypos.vn/#gia): trình
+  // duyệt nhảy thẳng xuống giữa trang, và mọi thứ phía trên đã "trôi qua"
+  // rồi. Để chúng chờ hiệu ứng thì người cuộn ngược lên thấy từng khối mờ
+  // dần hiện ra ở chỗ họ biết chắc là đã đi qua — cảm giác trang bị lỗi.
+  var tren = [];
+  khoi.forEach(function (el) {
+    if (el.getBoundingClientRect().bottom < 0) tren.push(el);
+  });
+  tren.forEach(function (el) {
+    el.style.transitionDelay = "0ms";
+    el.classList.add("hien");
+  });
+
+  var theoDoi = new IntersectionObserver(function (muc) {
+    muc.forEach(function (m) {
+      if (!m.isIntersecting) return;
+      m.target.classList.add("hien");
+      theoDoi.unobserve(m.target);
     });
-  })();
-</script>
+  }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
 
+  khoi.forEach(function (el) {
+    if (el.classList.contains("hien")) return;
+    theoDoi.observe(el);
+  });
+
+})();
+</script>
 </body>
 </html>

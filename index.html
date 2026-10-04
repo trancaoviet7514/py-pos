@@ -17,7 +17,7 @@
 <title>PY POS — Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê</title>
 <meta name="description" content="Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê: phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp, máy quét mã vạch, thiết bị cầm tay.">
 <meta property="og:title" content="PY POS — Giải pháp quản lý bán hàng cho nhà hàng và quán cà phê">
-<meta property="og:description" content="Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp, máy quét mã vạch, thiết bị cầm tay. Mất mạng vẫn bán được. Trả một lần, dùng mãi.">
+<meta property="og:description" content="Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp, máy quét mã vạch, thiết bị cầm tay. Mất mạng vẫn bán được. Gói linh hoạt theo mô hình quán.">
 <meta property="og:type" content="website">
 
 <!-- Ảnh cho thẻ link khi ai đó dán pypos.vn lên Zalo / Facebook.
@@ -584,43 +584,11 @@
     border-radius: 999px; padding: 9px 16px; font-size: 16px;
   }
 
-  /* ---------- bảng giá ---------- */
-  .bang-gia { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-  .goi {
-    background: var(--surface); border: 1px solid var(--line);
-    border-radius: 16px; padding: 22px; box-shadow: var(--shadow);
-    display: flex; flex-direction: column;
-  }
-  /* Gói giữa nổi lên bằng VIỀN, không bằng màu nền đặc: nền đặc thì chữ
-     trong đó phải đổi màu theo, và cả khối thành một mảng xanh to đè mất
-     hai gói bên cạnh — mà hai gói kia vẫn là thứ có người mua. */
-  .goi-nhan { border: 2px solid var(--green); }
-  .goi-huy {
-    margin: -6px 0 6px; color: var(--green-dark);
-    font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-  }
-  .goi h3 { font-size: 21px; margin: 0 0 2px; }
-  .goi-cho { margin: 0 0 14px; color: var(--muted); font-size: 15px; }
-  .goi-gia { margin: 0 0 16px; font-size: 27px; font-weight: 700; letter-spacing: -.5px; }
-  .goi-gia span { font-size: 15px; font-weight: 400; color: var(--muted); }
-  /* Gói Chuỗi không có số: chữ để nguyên cỡ 27px thì nó thành dòng to nhất
-     thẻ mà lại không nói được giá, kéo mắt sai chỗ. */
-  .goi-gia-hoi { font-size: 21px; color: var(--green-dark); }
-  /* Cả ba gói liệt kê CÙNG một danh sách dòng, gói nào không có thì để dấu
-     gạch. Cách cũ — mỗi gói chỉ kể phần thêm của nó rồi ghi "mọi thứ của
-     gói dưới" — buộc người đọc tự ghép trong đầu mới biết lấy gói rẻ thì
-     mất gì. Bảng báo giá của POSAPP làm đúng kiểu này, và đó là chỗ duy
-     nhất trang họ dễ đọc hơn trang mình. */
-  .goi-ds { list-style: none; margin: 0 0 20px; padding: 0; font-size: 16px; }
-  .goi-ds li { position: relative; padding-left: 26px; margin-bottom: 8px; }
-  .goi-ds li::before { position: absolute; left: 0; top: -1px; }
-  .goi-ds .co { color: var(--text); }
-  .goi-ds .co::before { content: "✓"; color: var(--green); font-weight: 700; }
-  .goi-ds .khong { color: #9AA294; }
-  .goi-ds .khong::before { content: "—"; color: #C3CCBE; }
-  /* Nút dính đáy thẻ: ba gói dài khác nhau, không dính thì ba nút lệch nhau
-     ba mức và mắt phải đi tìm. */
-  .goi .btn { margin-top: auto; text-align: center; }
+  /* ---------- gói ---------- */
+  /* Không có bảng giá: mục này chỉ còn một câu và một nút, nên căn giữa
+     cho nó đứng thành một khối, không trôi lệch trái giữa hai mục rộng. */
+  .goi-linh-hoat { text-align: center; }
+  .goi-linh-hoat .lead { margin-left: auto; margin-right: auto; }
   .ghi-chu { color: var(--muted); font-size: 15px; margin: 18px 0 0; }
 
   /* ---------- câu hỏi ---------- */
@@ -674,10 +642,10 @@
   .btn:active { transform: translateY(0); box-shadow: none; }
   .nav a, .chan-cot a, .goi-toi a, .tai-play a { transition: color .18s ease, opacity .18s ease; }
 
-  .card, .step, .goi, .pill {
+  .card, .step, .pill {
     transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
   }
-  .card:hover, .step:hover, .goi:hover {
+  .card:hover, .step:hover {
     transform: translateY(-4px);
     box-shadow: 0 2px 4px rgba(26,28,25,.05), 0 14px 32px rgba(26,28,25,.10);
   }
@@ -802,7 +770,7 @@
       <a href="#giai-phap">Giải pháp</a>
       <a href="#may-nao">Thiết bị</a>
       <a href="#tinh-nang">Tính năng</a>
-      <a href="#gia">Giá</a>
+      <a href="#gia">Gói</a>
       <a href="#bat-dau">Bắt đầu</a>
       <a href="#cau-hoi">Câu hỏi</a>
       <a class="btn btn-primary btn-nho nav-cta" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Dùng thử miễn phí</a>
@@ -829,12 +797,7 @@
         <p class="tagline">Phần mềm, máy bán hàng, máy in, két tiền, màn hình bếp,
         máy quét mã vạch, thiết bị cầm tay.</p>
 
-        <!-- Nút CHÍNH giờ là tải app, nút phụ là Zalo — đảo so với bản trước.
-             Bản trước để Zalo làm nút chính vì app trên Play miễn phí mà trang
-             này bán gói Quầy 7 triệu, đưa "tải miễn phí" lên trước là tự cắt
-             đường bán hàng. Chủ dự án chốt đảo lại ngày 30/09: cho tải thử
-             trước, bán sau. Mâu thuẫn mô hình kinh doanh vẫn còn nguyên, chỉ
-             là chọn ưu tiên khác — xem README. -->
+        <!-- Nút CHÍNH là tải app, nút phụ là Zalo: cho tải thử trước. -->
         <div class="cta">
           <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Dùng thử miễn phí</a>
           <a class="btn btn-secondary" href="https://zalo.me/0934773909">Liên hệ tư vấn</a>
@@ -881,7 +844,7 @@
   <section class="diem-manh bang-trang">
     <div class="wrap">
     <div class="strip">
-      <div><b>Trả một lần, dùng mãi</b><span>Không phí hàng tháng, không phí theo đơn</span></div>
+      <div><b>Gói theo mô hình quán</b><span>Một quầy, có bàn có bếp, hay nhiều chi nhánh</span></div>
       <div><b>Mất mạng vẫn bán</b><span>Bán, in bill, trừ kho đều chạy khi mạng chập chờn</span></div>
       <div><b>Chạy trên máy bạn đang có</b><span>Điện thoại, tablet, máy POS, máy tính</span></div>
       <div><b>Đổi máy không mất gì</b><span>Máy mới đăng nhập lại là đơn, menu, kho về đủ</span></div>
@@ -1183,29 +1146,29 @@
   <section id="quan-nao">
     <div class="wrap">
     <h2>Quán của bạn thuộc kiểu nào</h2>
-    <p class="lead">Ba kiểu quán, ba gói. Nhận ra mình ở đâu rồi nhảy thẳng
-    xuống gói tương ứng, không phải đọc hết bảng giá.</p>
+    <p class="lead">Mỗi kiểu quán cần một bộ tính năng khác. Nhận ra mình ở
+    đâu rồi nhắn cho chúng tôi, để được tư vấn gói vừa đúng thứ quán cần.</p>
     <div class="grid">
       <div class="card">
         <div class="kieu-anh" style="background-image: url(&quot;anh/kieu-quay.jpg&quot;)"></div>
         <h3>Một mình chủ bán</h3>
         <p>Cà phê take-away, xe nước, quán một quầy. Một máy là đủ, không
         cần chia ca, không cần phân quyền.</p>
-        <p class="goi-toi"><a href="#gia">Xem gói Quầy →</a></p>
+        <p class="goi-toi"><a href="#gia">Tư vấn gói cho quán một quầy →</a></p>
       </div>
       <div class="card">
         <div class="kieu-anh" style="background-image: url(&quot;anh/kieu-ban.jpg&quot;)"></div>
         <h3>Có bàn, có nhân viên</h3>
         <p>Cà phê có bàn, trà sữa, quán ăn sáng với 2–5 nhân viên và một góc
         bar hoặc bếp. Cần nhiều máy bán cùng lúc và cần chốt ca.</p>
-        <p class="goi-toi"><a href="#gia">Xem gói Quán →</a></p>
+        <p class="goi-toi"><a href="#gia">Tư vấn gói cho quán có bàn →</a></p>
       </div>
       <div class="card">
         <div class="kieu-anh" style="background-image: url(&quot;anh/kieu-chuoi.jpg&quot;)"></div>
         <h3>Từ hai quán trở lên</h3>
         <p>Đã mở chi nhánh thứ hai, hoặc muốn khách tự gọi món qua web. Cần
         một chỗ xem số của cả mấy quán cùng lúc.</p>
-        <p class="goi-toi"><a href="#gia">Xem gói Chuỗi →</a></p>
+        <p class="goi-toi"><a href="#gia">Tư vấn gói cho nhiều quán →</a></p>
       </div>
     </div>
 
@@ -1217,74 +1180,14 @@
   </section>
 
   <section id="gia" class="bang-trang">
-    <div class="wrap">
-    <h2>Giá</h2>
-    <p class="lead">Trả một lần, dùng mãi. Không phí hàng tháng, không phí
-    theo đơn, không ăn phần trăm doanh thu.</p>
-
-    <!-- GIÁ: ba dòng .goi-gia dưới đây là chỗ DUY NHẤT phải sửa khi đổi giá.
-         Viết theo đúng lối tiền của app và trang báo cáo: dấu chấm ngăn
-         nghìn, chữ đ liền sau số (7.000.000đ), không viết "7 triệu" — con số
-         đầy đủ là thứ chủ quán đối chiếu được với báo giá gửi qua Zalo. -->
-    <div class="bang-gia">
-      <div class="goi">
-        <h3>Quầy</h3>
-        <p class="goi-cho">Quán một mình chủ bán</p>
-        <p class="goi-gia">7.000.000đ<span> · trả một lần</span></p>
-        <ul class="goi-ds">
-          <li class="co">Máy bán hàng ở quầy</li>
-          <li class="co">Sơ đồ bàn, in bill, in tem</li>
-          <li class="co">Kho và công thức món</li>
-          <li class="co">Báo cáo từ xa</li>
-          <li class="khong">Nhiều máy bán cùng lúc</li>
-          <li class="khong">Màn hình bếp</li>
-          <li class="khong">Ca làm việc, đối chiếu quỹ</li>
-          <li class="khong">Web order cho khách</li>
-          <li class="khong">Nhiều chi nhánh</li>
-        </ul>
-        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
-      </div>
-      <div class="goi goi-nhan">
-        <p class="goi-huy">Quán chọn nhiều nhất</p>
-        <h3>Quán</h3>
-        <p class="goi-cho">Quán 2–5 nhân viên, có bếp</p>
-        <p class="goi-gia">12.000.000đ<span> · trả một lần</span></p>
-        <ul class="goi-ds">
-          <li class="co">Máy bán hàng ở quầy</li>
-          <li class="co">Sơ đồ bàn, in bill, in tem</li>
-          <li class="co">Kho và công thức món</li>
-          <li class="co">Báo cáo từ xa</li>
-          <li class="co">Nhiều máy bán cùng lúc</li>
-          <li class="co">Màn hình bếp</li>
-          <li class="co">Ca làm việc, đối chiếu quỹ</li>
-          <li class="khong">Web order cho khách</li>
-          <li class="khong">Nhiều chi nhánh</li>
-        </ul>
-        <a class="btn btn-primary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
-      </div>
-      <div class="goi">
-        <h3>Chuỗi</h3>
-        <p class="goi-cho">Từ hai quán trở lên</p>
-        <p class="goi-gia goi-gia-hoi">Liên hệ tư vấn</p>
-        <ul class="goi-ds">
-          <li class="co">Máy bán hàng ở quầy</li>
-          <li class="co">Sơ đồ bàn, in bill, in tem</li>
-          <li class="co">Kho và công thức món</li>
-          <li class="co">Báo cáo từ xa</li>
-          <li class="co">Nhiều máy bán cùng lúc</li>
-          <li class="co">Màn hình bếp</li>
-          <li class="co">Ca làm việc, đối chiếu quỹ</li>
-          <li class="co">Web order cho khách</li>
-          <li class="co">Nhiều chi nhánh, báo cáo tổng</li>
-        </ul>
-        <a class="btn btn-secondary" href="https://zalo.me/0934773909">Tư vấn gói này</a>
-      </div>
-    </div>
-
-    <p class="ghi-chu">Từ gói Quán trở lên có thêm phân quyền nhân viên và
-    truy vết ai sửa gì. Giá trên là phần mềm — máy in, tablet, màn hình bếp
-    thì bạn mua ngoài, loại phổ thông nào cũng chạy, không bắt mua thiết bị
-    của riêng ai.</p>
+    <div class="wrap goi-linh-hoat">
+    <h2>Gói linh hoạt</h2>
+    <p class="lead">Mỗi quán một kiểu, nên gói cũng theo quán: mấy máy bán,
+    có bếp hay không, một quán hay nhiều chi nhánh. Nói qua về quán của bạn,
+    chúng tôi tư vấn gói vừa đúng thứ cần dùng.</p>
+    <a class="btn btn-primary" href="https://zalo.me/0934773909">Nhắn Zalo để được tư vấn</a>
+    <p class="ghi-chu">Máy in, tablet, màn hình bếp loại phổ thông nào cũng
+    chạy — không bắt mua thiết bị của riêng ai.</p>
     </div>
   </section>
 
@@ -1342,10 +1245,10 @@
     </details>
 
     <details>
-      <summary>Có phí hàng tháng không?</summary>
-      <p>Không. Trả một lần, dùng mãi — không phí tháng, không phí theo đơn,
-      không ăn phần trăm doanh thu. Quán bán được nhiều hơn thì đó là tiền
-      của bạn, không phải phần chia thêm cho phần mềm.</p>
+      <summary>Gói tính tiền thế nào?</summary>
+      <p>Tuỳ mô hình quán: mấy máy bán, có bếp hay không, một quán hay nhiều
+      chi nhánh. Nhắn Zalo nói qua về quán của bạn, chúng tôi tư vấn gói
+      phù hợp.</p>
     </details>
 
     <details>
@@ -1393,11 +1296,6 @@
     <div class="wrap">
     <div class="contact-in">
       <h2>Cần tư vấn thêm?</h2>
-      <!-- Câu cũ: "App đang chạy thật ở quán và sắp lên Google Play. Nhắn
-           cho tôi để nhận bản dùng thử và góp ý thêm cho quán của bạn."
-           Đó là giọng của một bản thử nghiệm đang xin ý kiến — đứng ngay
-           dưới một bảng giá 7 đến 12 triệu thì nó tự phá mất phần còn lại
-           của trang. -->
       <p>Nhắn Zalo để nhận bản dùng thử. Nói qua về quán của bạn — mấy máy,
       có bếp hay không, một quán hay nhiều quán — rồi tôi báo đúng gói và
       cách bắt đầu.</p>
@@ -1431,9 +1329,9 @@
         <a href="#offline">Vì sao offline</a>
       </div>
       <div class="chan-cot">
-        <b>Gói và giá</b>
+        <b>Gói</b>
         <a href="#quan-nao">Quán kiểu nào</a>
-        <a href="#gia">Bảng giá</a>
+        <a href="#gia">Gói linh hoạt</a>
         <a href="#bat-dau">Bắt đầu</a>
         <a href="#cau-hoi">Câu hỏi thường gặp</a>
       </div>
@@ -1485,7 +1383,7 @@
 
   // Khung lưới thì hiện TỪNG Ô để có nhịp; khối thường hiện cả khối. Hiện
   // cả cái lưới một lúc thì bốn thẻ nhảy lên cùng nhau, nhìn như một cục.
-  var LUOI = ".grid, .steps, .bang-gia, .pills, .tb-duoi, .strip";
+  var LUOI = ".grid, .steps, .pills, .tb-duoi, .strip";
   var khoi = [];
   document.querySelectorAll("section > .wrap > *").forEach(function (el) {
     if (el.matches(LUOI)) {

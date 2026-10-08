@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tạo tài khoản — PY POS</title>
+<meta name="description" content="Tạo tài khoản PY POS cho quán bằng số điện thoại, rồi đăng nhập app trên iPhone, iPad hoặc Android.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232E7D32'/><path fill='%23fff' fill-rule='evenodd' d='M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z'/></svg>">
+<!--
+  Vì sao có trang này: bản iOS KHÔNG được tạo tài khoản trong app.
+
+  Apple từ chối bản 1.0 (2) ngày 08/10/2026 theo Guideline 3.1.1 — app cho
+  doanh nghiệp tự đăng ký tài khoản bị coi là cửa bán quyền dùng ở ngoài
+  In-App Purchase. Nên trên iPhone/iPad quán tạo tài khoản ở ĐÂY rồi mới
+  đăng nhập app. Và cũng vì luật đó, app iOS không được có link nào trỏ về
+  trang này: đường tới đây phải đi qua Zalo, Facebook, tờ hướng dẫn...
+
+  Trang này gọi ĐÚNG hàm đăng ký mà app gọi (lib/features/sync/data/
+  sync_repository.dart → signUp): tài khoản Supabase đứng tên một địa chỉ
+  nội bộ sinh từ số điện thoại, không phải email thật. Đổi luật ở bên kia
+  (định dạng số, độ dài mật khẩu, tên miền nội bộ) thì PHẢI sửa cả ở đây,
+  không thì tài khoản tạo trên web không đăng nhập được app.
+
+  KHÔNG nhắc tới gói, giá hay "dùng thử" ở trang này: đó chính là thứ làm
+  Apple kết luận tài khoản là thứ được bán.
+-->
+<style>
+  :root {
+    --green: #2E7D32; --green-dark: #1B5E20; --green-soft: #E8F1E4;
+    --bg: #F7FAF3; --surface: #FFFFFF; --line: #C1CFBA;
+    --text: #1A1C19; --muted: #5A6157; --error: #B3261E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px; }
+  a { color: var(--green-dark); }
+  .top { background: var(--green-dark); color: #fff; padding: 24px 0 20px; }
+  .top .wrap { display: flex; align-items: center; gap: 12px; }
+  .top svg { width: 34px; height: 34px; flex: none; }
+  .top b { font-size: 18px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 30px 0 8px; letter-spacing: -.4px; }
+  .phu { color: var(--muted); margin: 0 0 22px; }
+  form, .xong {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px 20px;
+  }
+  label { display: block; font-weight: 600; margin: 0 0 6px; }
+  .o { margin-bottom: 18px; }
+  input {
+    width: 100%; font: inherit; padding: 13px 14px;
+    border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--text);
+  }
+  input:focus { outline: 2px solid var(--green); outline-offset: 1px; border-color: var(--green); }
+  input[aria-invalid="true"] { border-color: var(--error); }
+  .loi { color: var(--error); font-size: 15px; margin: 6px 0 0; min-height: 0; }
+  .loi:empty { display: none; }
+  button {
+    width: 100%; font: inherit; font-weight: 600; padding: 14px;
+    border: 0; border-radius: 12px; background: var(--green); color: #fff; cursor: pointer;
+  }
+  button:disabled { opacity: .6; cursor: default; }
+  .thongbao { color: var(--error); margin: 14px 0 0; }
+  .thongbao:empty { display: none; }
+  .xong h2 { margin: 0 0 10px; font-size: 21px; }
+  .xong ol { padding-left: 22px; margin: 10px 0 0; }
+  .xong li { margin: 6px 0; }
+  .so { font-weight: 700; }
+  .chan { color: var(--muted); font-size: 15px; margin: 22px 0 40px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#fff"/><path fill="#1B5E20" fill-rule="evenodd" d="M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z"/></svg>
+  <b>PY POS</b>
+</div></div>
+
+<main class="wrap">
+  <h1>Tạo tài khoản cho quán</h1>
+  <p class="phu">Tạo xong, mở app PY POS trên iPhone, iPad hoặc Android và đăng nhập bằng đúng số điện thoại, mật khẩu này.</p>
+
+  <form id="form" novalidate>
+    <div class="o">
+      <label for="sdt">Số điện thoại</label>
+      <input id="sdt" type="tel" inputmode="tel" autocomplete="tel" placeholder="0901234567">
+      <p class="loi" id="loi-sdt"></p>
+    </div>
+    <div class="o">
+      <label for="mk">Mật khẩu</label>
+      <input id="mk" type="password" autocomplete="new-password">
+      <p class="loi" id="loi-mk"></p>
+    </div>
+    <div class="o">
+      <label for="mk2">Nhập lại mật khẩu</label>
+      <input id="mk2" type="password" autocomplete="new-password">
+      <p class="loi" id="loi-mk2"></p>
+    </div>
+    <button id="nut" type="submit">Tạo tài khoản</button>
+    <p class="thongbao" id="thongbao" role="alert"></p>
+  </form>
+
+  <div class="xong" id="xong" hidden>
+    <h2>Đã tạo tài khoản</h2>
+    <p>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng.</p>
+    <ol>
+      <li>Mở app <b>PY POS</b> trên máy bán hàng.</li>
+      <li>Đăng nhập bằng số điện thoại và mật khẩu vừa đặt.</li>
+      <li>Bấm <b>Tạo quán mới</b>, đặt tên quán là bán được.</li>
+    </ol>
+  </div>
+
+  <p class="chan">Xem <a href="quyen-rieng-tu.html">chính sách quyền riêng tư</a> để biết PY POS lưu những gì.</p>
+</main>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+// Khóa này công khai được — nó nằm sẵn trong mọi bản app khách cài về, và
+// trang báo cáo (dashboard/) cũng dùng đúng khóa này. An toàn nằm ở RLS
+// phía server: tài khoản mới chỉ thấy đúng quán rỗng của chính nó.
+const SUPABASE_URL = 'https://vukseslzkxssihcmymcz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1a3Nlc2x6a3hzc2loY215bWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzY0MzUsImV4cCI6MjEwNTA1MjQzNX0.CsZWfJ3zH1T15e1ufuoeUbSfu5UIJl3tT8DpKZSOLSQ';
+
+// KHÔNG giữ phiên trong trình duyệt: trang này chỉ để tạo tài khoản, người
+// ta không dùng gì trên web cả. Giữ phiên là để lại một tài khoản đăng
+// nhập sẵn trên máy tính của ai đó — có khi là máy ở tiệm in.
+const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+// ---- Ba luật dưới đây chép từ app, phải giữ Y HỆT ----
+// lib/features/sync/domain/phone_login.dart: normalizeVnPhone,
+// kAccountEmailDomain; lib/features/sync/domain/sync_auth.dart:
+// minSignUpPasswordLength.
+const TEN_MIEN_NOI_BO = 'phone.pypos.invalid';
+const MAT_KHAU_TOI_THIEU = 6;
+
+function chuanHoaSo(raw) {
+  const digits = raw.replace(/[^0-9]/g, '');
+  if (!digits) return null;
+  let sub;
+  if (digits.startsWith('84')) sub = digits.slice(2);
+  else if (digits.startsWith('0')) sub = digits.slice(1);
+  else sub = digits;
+  if (sub.length < 9 || sub.length > 10) return null;
+  if (!/^[2-9]/.test(sub)) return null;
+  return '84' + sub;
+}
+// ------------------------------------------------------
+
+const $ = (id) => document.getElementById(id);
+
+function datLoi(o, chu) {
+  $('loi-' + o).textContent = chu || '';
+  $(o).setAttribute('aria-invalid', chu ? 'true' : 'false');
+}
+
+// Gõ lại vào ô nào thì xóa lỗi của ô đó, như trong app.
+for (const o of ['sdt', 'mk', 'mk2']) {
+  $(o).addEventListener('input', () => datLoi(o, ''));
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('thongbao').textContent = '';
+
+  const sdt = $('sdt').value.trim();
+  const mk = $('mk').value;
+  const mk2 = $('mk2').value;
+  const so = chuanHoaSo(sdt);
+
+  const loiSdt = !sdt ? 'Nhập số điện thoại'
+    : !so ? 'Số điện thoại chưa đúng, ví dụ 0901234567' : '';
+  const loiMk = !mk ? 'Nhập mật khẩu'
+    : mk.length < MAT_KHAU_TOI_THIEU ? `Mật khẩu cần ít nhất ${MAT_KHAU_TOI_THIEU} ký tự` : '';
+  const loiMk2 = !mk2 ? 'Nhập lại mật khẩu'
+    : mk2 !== mk ? 'Hai mật khẩu chưa giống nhau' : '';
+  datLoi('sdt', loiSdt); datLoi('mk', loiMk); datLoi('mk2', loiMk2);
+  if (loiSdt || loiMk || loiMk2) return;
+
+  $('nut').disabled = true;
+  $('nut').textContent = 'Đang tạo…';
+  try {
+    const { data, error } = await db.auth.signUp({ email: `${so}@${TEN_MIEN_NOI_BO}`, password: mk });
+    // Dự án đang tắt xác nhận email nên đăng ký là có phiên luôn. Ai bật
+    // lại thiết lập đó thì `session` về null và tài khoản CHƯA dùng được —
+    // phải nói thật, đừng báo "đã tạo" rồi để người ta đăng nhập app không
+    // vào (cùng cách app xử lý, xem signUpNeedsEmailConfirm).
+    if (!error && !data.session) {
+      $('thongbao').textContent = 'Tài khoản chưa dùng được ngay. Nhắn Zalo 0934 773 909 để được kích hoạt.';
+      return;
+    }
+    if (error) {
+      const code = error.code || '';
+      const msg = (error.message || '').toLowerCase();
+      if (code === 'user_already_exists' || code === 'email_exists' ||
+          msg.includes('already registered') || msg.includes('already exists')) {
+        datLoi('sdt', 'Số này đã có tài khoản — mở app và đăng nhập bằng số này');
+      } else if (code === 'weak_password') {
+        datLoi('mk', 'Mật khẩu quá yếu — thêm chữ và số');
+      } else if (error.status === 429 || code === 'over_email_send_rate_limit') {
+        $('thongbao').textContent = 'Đang bị chặn vì thử quá nhiều lần. Chờ vài phút rồi làm lại.';
+      } else {
+        $('thongbao').textContent = 'Chưa tạo được tài khoản. Thử lại sau ít phút.';
+      }
+      return;
+    }
+    await db.auth.signOut();
+    $('so-xong').textContent = '0' + so.slice(2);
+    $('form').hidden = true;
+    $('xong').hidden = false;
+  } catch (_) {
+    $('thongbao').textContent = 'Không kết nối được — kiểm tra mạng rồi thử lại.';
+  } finally {
+    $('nut').disabled = false;
+    $('nut').textContent = 'Tạo tài khoản';
+  }
+});
+</script>
+</body>
+</html>

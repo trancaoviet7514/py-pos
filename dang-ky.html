@@ -137,8 +137,22 @@
   <p class="chan">Xem <a href="quyen-rieng-tu.html">chính sách quyền riêng tư</a> để biết PY POS lưu những gì.</p>
 </main>
 
+<!--
+  supabase-js KHÓA CỨNG phiên bản + SRI (08/10/2026). Trước đó nạp
+  `@supabase/supabase-js@2/+esm` — phiên bản trôi theo bản mới nhất, và CDN
+  bị chiếm là trang chạy mã lạ ngay trong phiên đăng nhập. Giờ trình duyệt
+  so mã băm: file trên CDN bị thay một byte là KHÔNG chạy (trang hỏng, chứ
+  không chạy mã lạ).
+
+  Nâng phiên bản: đổi số trong URL rồi tính lại mã băm:
+    curl -s <URL> | openssl dgst -sha384 -binary | openssl base64 -A
+-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
+        integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R"
+        crossorigin="anonymous"></script>
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Nạp bằng thẻ <script> có SRI ở trên — xem chú thích ở đó.
+const { createClient } = window.supabase;
 
 // Khóa này công khai được — nó nằm sẵn trong mọi bản app khách cài về, và
 // trang báo cáo (dashboard/) cũng dùng đúng khóa này. An toàn nằm ở RLS

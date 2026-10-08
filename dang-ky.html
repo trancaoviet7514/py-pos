@@ -70,6 +70,15 @@
   .xong ol { padding-left: 22px; margin: 10px 0 0; }
   .xong li { margin: 6px 0; }
   .so { font-weight: 700; }
+  .tai { display: grid; gap: 10px; margin: 14px 0 6px; }
+  .nut-tai {
+    display: flex; flex-direction: column; text-decoration: none;
+    padding: 12px 16px; border-radius: 12px; background: var(--green); color: #fff;
+  }
+  .nut-tai b { font-size: 17px; }
+  .nut-tai span { font-size: 14px; opacity: .9; }
+  .nut-tai.sap-co { background: var(--green-soft); color: var(--muted); }
+  @media (min-width: 480px) { .tai { grid-template-columns: 1fr 1fr; } }
   .chan { color: var(--muted); font-size: 15px; margin: 22px 0 40px; }
   [hidden] { display: none !important; }
 </style>
@@ -106,9 +115,20 @@
 
   <div class="xong" id="xong" hidden>
     <h2>Đã tạo tài khoản</h2>
-    <p>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng.</p>
+    <p>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng. Giờ tải app về máy bán hàng để tiếp tục:</p>
+    <div class="tai">
+      <a class="nut-tai" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">
+        <b>Google Play</b><span>Điện thoại, máy POS Android</span>
+      </a>
+      <a class="nut-tai" id="tai-ios" href="#" hidden>
+        <b>App Store</b><span>iPhone, iPad</span>
+      </a>
+      <div class="nut-tai sap-co" id="ios-sap-co">
+        <b>App Store</b><span>iPhone, iPad — sắp có</span>
+      </div>
+    </div>
     <ol>
-      <li>Mở app <b>PY POS</b> trên máy bán hàng.</li>
+      <li>Mở app <b>PY POS</b> vừa tải.</li>
       <li>Đăng nhập bằng số điện thoại và mật khẩu vừa đặt.</li>
       <li>Bấm <b>Tạo quán mới</b>, đặt tên quán là bán được.</li>
     </ol>
@@ -132,6 +152,17 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+// Link App Store của bản iOS. Để TRỐNG chừng nào Apple chưa duyệt: trang
+// hiện "sắp có" thay vì một nút dẫn tới trang không tồn tại. Duyệt xong thì
+// dán link (https://apps.apple.com/vn/app/...) vào đây là nút tự hiện.
+const LINK_APP_STORE = '';
+if (LINK_APP_STORE) {
+  const a = document.getElementById('tai-ios');
+  a.href = LINK_APP_STORE;
+  a.hidden = false;
+  document.getElementById('ios-sap-co').hidden = true;
+}
 
 // ---- Ba luật dưới đây chép từ app, phải giữ Y HỆT ----
 // lib/features/sync/domain/phone_login.dart: normalizeVnPhone,

@@ -16,11 +16,14 @@
   đăng nhập app. Và cũng vì luật đó, app iOS không được có link nào trỏ về
   trang này: đường tới đây phải đi qua Zalo, Facebook, tờ hướng dẫn...
 
-  Trang này gọi ĐÚNG hàm đăng ký mà app gọi (lib/features/sync/data/
-  sync_repository.dart → signUp): tài khoản Supabase đứng tên một địa chỉ
-  nội bộ sinh từ số điện thoại, không phải email thật. Đổi luật ở bên kia
-  (định dạng số, độ dài mật khẩu, tên miền nội bộ) thì PHẢI sửa cả ở đây,
-  không thì tài khoản tạo trên web không đăng nhập được app.
+  Trang này đi ĐÚNG luồng đăng ký của app (luật 0.9m): hỏi Edge Function
+  `xac-thuc-sdt` số này đăng ký được không → Firebase gửi mã SMS → người
+  dùng nhập mã → gửi giấy chứng nhận (ID token) của Firebase lên function
+  → function tạo tài khoản Supabase đứng tên địa chỉ nội bộ sinh từ số điện
+  thoại. Server chưa bật xác nhận số (trả `chua_co_sms`) thì rơi về đường
+  cũ: gọi thẳng `signUp` như app. Đổi luật ở bên kia (định dạng số, độ dài
+  mật khẩu, tên miền nội bộ) thì PHẢI sửa cả ở đây, không thì tài khoản
+  tạo trên web không đăng nhập được app.
 
   KHÔNG nhắc tới gói, giá hay "dùng thử" ở trang này: đó chính là thứ làm
   Apple kết luận tài khoản là thứ được bán.
@@ -113,6 +116,21 @@
     <p class="thongbao" id="thongbao" role="alert"></p>
   </form>
 
+  <!-- Bước 2: nhập mã Firebase gửi tới số vừa gõ. -->
+  <form id="form-ma" novalidate hidden>
+    <p>Đã gửi mã 6 số tới <span class="so" id="so-gui"></span>.</p>
+    <div class="o">
+      <label for="ma">Mã xác nhận</label>
+      <input id="ma" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+      <p class="loi" id="loi-ma"></p>
+    </div>
+    <button id="nut-ma" type="submit">Xác nhận và tạo tài khoản</button>
+    <p class="thongbao" id="thongbao-ma" role="alert"></p>
+    <p class="phu" style="margin:14px 0 0"><a href="#" id="gui-lai">Gửi lại mã</a> · <a href="#" id="doi-so">Đổi số khác</a></p>
+  </form>
+  <!-- Firebase gắn reCAPTCHA vô hình vào đây; thường không hiện gì. -->
+  <div id="recaptcha"></div>
+
   <div class="xong" id="xong" hidden>
     <h2>Đã tạo tài khoản</h2>
     <p>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng. Giờ tải app về máy bán hàng để tiếp tục:</p>
@@ -150,12 +168,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
         integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R"
         crossorigin="anonymous"></script>
+<!--
+  Firebase JS (chỉ để gửi và kiểm mã SMS) — khóa cứng phiên bản + SRI, cùng
+  lý do với supabase-js ở trên. Bản "compat" vì là file <script> thường:
+  SRI không áp được cho các `import` bên trong một module.
+-->
+<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"
+        integrity="sha384-NGw427w9kUd0u0OjHkygdwNKinWp4DiQMkOsafkwq98j2+E3EN8pn0oSlx3Fe61F"
+        crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"
+        integrity="sha384-P44Lc4FFaOc/XnFQzAIpmmZZpAstRvYwQLiHHU5LHtlBmblzk5gCbsRCe4hJY6IN"
+        crossorigin="anonymous"></script>
 <script type="module">
 // Nạp bằng thẻ <script> có SRI ở trên — xem chú thích ở đó.
 const { createClient } = window.supabase;
 
-// Khóa này công khai được — nó nằm sẵn trong mọi bản app khách cài về, và
-// trang báo cáo (dashboard/) cũng dùng đúng khóa này. An toàn nằm ở RLS
+// Khóa này công khai được — nó nằm sẵn trong mọi bản app khách cài về, kể
+// cả bản web ở nhahang.pypos.vn. An toàn nằm ở RLS
 // phía server: tài khoản mới chỉ thấy đúng quán rỗng của chính nó.
 const SUPABASE_URL = 'https://vukseslzkxssihcmymcz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1a3Nlc2x6a3hzc2loY215bWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzY0MzUsImV4cCI6MjEwNTA1MjQzNX0.CsZWfJ3zH1T15e1ufuoeUbSfu5UIJl3tT8DpKZSOLSQ';
@@ -170,7 +199,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
 // Link App Store của bản iOS. Để TRỐNG chừng nào Apple chưa duyệt: trang
 // hiện "sắp có" thay vì một nút dẫn tới trang không tồn tại. Duyệt xong thì
 // dán link (https://apps.apple.com/vn/app/...) vào đây là nút tự hiện.
-const LINK_APP_STORE = '';
+const LINK_APP_STORE = 'https://apps.apple.com/vn/app/py-pos-nh%C3%A0-h%C3%A0ng/id6820343854';
 if (LINK_APP_STORE) {
   const a = document.getElementById('tai-ios');
   a.href = LINK_APP_STORE;
@@ -210,6 +239,94 @@ for (const o of ['sdt', 'mk', 'mk2']) {
   $(o).addEventListener('input', () => datLoi(o, ''));
 }
 
+// Firebase — cấu hình app Web trên Firebase Console, PHẢI khớp
+// lib/core/config/firebase_config.dart. Không phải bí mật.
+firebase.initializeApp({
+  apiKey: 'AIzaSyCeiBYzqVBEggmumKW76Q69RtIfGsBWE50',
+  authDomain: 'py-pos-1bce4.firebaseapp.com',
+  projectId: 'py-pos-1bce4',
+  messagingSenderId: '1091109577306',
+  appId: '1:1091109577306:web:c5df07aa4195879001ee63',
+});
+const fb = firebase.auth();
+fb.languageCode = 'vi';
+// Phiên Firebase chỉ sống đủ để lấy token rồi bỏ — tài khoản thật ở Supabase.
+fb.setPersistence(firebase.auth.Auth.Persistence.NONE);
+let recaptcha = null;
+let xacNhan = null;     // ConfirmationResult của lần gửi mã gần nhất
+let dangKy = null;      // { so, mk } đang chờ nhập mã
+
+// Gọi Edge Function xac-thuc-sdt. Luôn về { ket_qua } (HTTP 200); 404 =
+// function chưa deploy → coi như chưa có SMS, đi đường cũ.
+async function goiServer(than) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/xac-thuc-sdt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    body: JSON.stringify(than),
+  });
+  if (res.status === 404) return { ket_qua: 'chua_co_sms' };
+  return res.json();
+}
+
+// Đổi lỗi Firebase thành câu tiếng Việt — cùng bộ câu với docLoiFirebase
+// trong lib/features/sync/domain/otp.dart.
+function cauLoiFirebase(code) {
+  switch (code) {
+    case 'auth/invalid-verification-code': return ['ma', 'Mã chưa đúng'];
+    case 'auth/code-expired':
+    case 'auth/session-expired': return ['ma', 'Mã đã hết hạn — bấm "Gửi lại mã"'];
+    case 'auth/invalid-phone-number': return ['sdt', 'Số điện thoại chưa đúng, ví dụ 0901234567'];
+    case 'auth/too-many-requests':
+    case 'auth/quota-exceeded': return [null, 'Thử quá nhiều lần. Chờ khoảng một giờ rồi làm lại.'];
+    case 'auth/network-request-failed': return [null, 'Không kết nối được — kiểm tra mạng rồi thử lại.'];
+    default: return [null, `Chưa gửi được mã xác nhận (${code}).`];
+  }
+}
+
+function hienXong(so) {
+  $('so-xong').textContent = '0' + so.slice(2);
+  $('form').hidden = true;
+  $('form-ma').hidden = true;
+  $('xong').hidden = false;
+}
+
+async function guiMa(so) {
+  if (!recaptcha) {
+    recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha', { size: 'invisible' });
+  }
+  xacNhan = await fb.signInWithPhoneNumber('+' + so, recaptcha);
+}
+
+// Đường cũ, khi server chưa bật xác nhận số: gọi thẳng signUp như app.
+async function dangKyKhongXacNhan(so, mk) {
+  const { data, error } = await db.auth.signUp({ email: `${so}@${TEN_MIEN_NOI_BO}`, password: mk });
+  // Dự án đang tắt xác nhận email nên đăng ký là có phiên luôn. Ai bật
+  // lại thiết lập đó thì `session` về null và tài khoản CHƯA dùng được —
+  // phải nói thật, đừng báo "đã tạo" rồi để người ta đăng nhập app không
+  // vào (cùng cách app xử lý, xem signUpNeedsEmailConfirm).
+  if (!error && !data.session) {
+    $('thongbao').textContent = 'Tài khoản chưa dùng được ngay. Nhắn Zalo 0934 773 909 để được kích hoạt.';
+    return;
+  }
+  if (error) {
+    const code = error.code || '';
+    const msg = (error.message || '').toLowerCase();
+    if (code === 'user_already_exists' || code === 'email_exists' ||
+        msg.includes('already registered') || msg.includes('already exists')) {
+      datLoi('sdt', 'Số này đã có tài khoản — mở app và đăng nhập bằng số này');
+    } else if (code === 'weak_password') {
+      datLoi('mk', 'Mật khẩu quá yếu — thêm chữ và số');
+    } else if (error.status === 429 || code === 'over_email_send_rate_limit') {
+      $('thongbao').textContent = 'Đang bị chặn vì thử quá nhiều lần. Chờ vài phút rồi làm lại.';
+    } else {
+      $('thongbao').textContent = 'Chưa tạo được tài khoản. Thử lại sau ít phút.';
+    }
+    return;
+  }
+  await db.auth.signOut();
+  hienXong(so);
+}
+
 $('form').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('thongbao').textContent = '';
@@ -229,42 +346,85 @@ $('form').addEventListener('submit', async (e) => {
   if (loiSdt || loiMk || loiMk2) return;
 
   $('nut').disabled = true;
-  $('nut').textContent = 'Đang tạo…';
+  $('nut').textContent = 'Đang gửi mã…';
   try {
-    const { data, error } = await db.auth.signUp({ email: `${so}@${TEN_MIEN_NOI_BO}`, password: mk });
-    // Dự án đang tắt xác nhận email nên đăng ký là có phiên luôn. Ai bật
-    // lại thiết lập đó thì `session` về null và tài khoản CHƯA dùng được —
-    // phải nói thật, đừng báo "đã tạo" rồi để người ta đăng nhập app không
-    // vào (cùng cách app xử lý, xem signUpNeedsEmailConfirm).
-    if (!error && !data.session) {
-      $('thongbao').textContent = 'Tài khoản chưa dùng được ngay. Nhắn Zalo 0934 773 909 để được kích hoạt.';
+    // Hỏi server TRƯỚC khi nhờ Firebase gửi tin: mỗi tin là tiền, và số đã
+    // có tài khoản thì gửi mã xong cũng không tạo được.
+    const kiem = await goiServer({ hanh_dong: 'kiem_tra', sdt: so, muc_dich: 'dang_ky' });
+    if (kiem.ket_qua === 'chua_co_sms') return await dangKyKhongXacNhan(so, mk);
+    if (kiem.ket_qua === 'da_co_tai_khoan') {
+      return datLoi('sdt', 'Số này đã có tài khoản — mở app và đăng nhập bằng số này');
+    }
+    if (kiem.ket_qua !== 'hop_le') {
+      $('thongbao').textContent = `Server đang lỗi, thử lại sau ít phút (${kiem.ket_qua || 'khong_ro'}).`;
       return;
     }
-    if (error) {
-      const code = error.code || '';
-      const msg = (error.message || '').toLowerCase();
-      if (code === 'user_already_exists' || code === 'email_exists' ||
-          msg.includes('already registered') || msg.includes('already exists')) {
-        datLoi('sdt', 'Số này đã có tài khoản — mở app và đăng nhập bằng số này');
-      } else if (code === 'weak_password') {
-        datLoi('mk', 'Mật khẩu quá yếu — thêm chữ và số');
-      } else if (error.status === 429 || code === 'over_email_send_rate_limit') {
-        $('thongbao').textContent = 'Đang bị chặn vì thử quá nhiều lần. Chờ vài phút rồi làm lại.';
-      } else {
-        $('thongbao').textContent = 'Chưa tạo được tài khoản. Thử lại sau ít phút.';
-      }
-      return;
-    }
-    await db.auth.signOut();
-    $('so-xong').textContent = '0' + so.slice(2);
+
+    await guiMa(so);
+    dangKy = { so, mk };
+    $('so-gui').textContent = '0' + so.slice(2);
     $('form').hidden = true;
-    $('xong').hidden = false;
-  } catch (_) {
-    $('thongbao').textContent = 'Không kết nối được — kiểm tra mạng rồi thử lại.';
+    $('form-ma').hidden = false;
+    $('ma').focus();
+  } catch (err) {
+    const [o, chu] = err && err.code ? cauLoiFirebase(err.code) : [null, 'Không kết nối được — kiểm tra mạng rồi thử lại.'];
+    if (o === 'sdt') datLoi('sdt', chu); else $('thongbao').textContent = chu;
   } finally {
     $('nut').disabled = false;
     $('nut').textContent = 'Tạo tài khoản';
   }
+});
+
+$('ma').addEventListener('input', () => datLoi('ma', ''));
+
+$('form-ma').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('thongbao-ma').textContent = '';
+  const ma = $('ma').value.trim();
+  if (!/^\d{6}$/.test(ma)) return datLoi('ma', ma ? 'Mã gồm 6 chữ số' : 'Nhập mã trong tin nhắn');
+
+  $('nut-ma').disabled = true;
+  $('nut-ma').textContent = 'Đang xác nhận…';
+  try {
+    const kq = await xacNhan.confirm(ma);
+    const token = await kq.user.getIdToken();
+    await fb.signOut();
+    const tra = await goiServer({
+      hanh_dong: 'xac_nhan_firebase', sdt: dangKy.so, muc_dich: 'dang_ky',
+      firebase_token: token, mat_khau: dangKy.mk,
+    });
+    if (tra.ket_qua === 'xong') return hienXong(dangKy.so);
+    $('thongbao-ma').textContent = {
+      da_co_tai_khoan: 'Số này vừa có tài khoản — mở app và đăng nhập bằng số này.',
+      ma_het_han: 'Mã đã hết hạn — bấm "Gửi lại mã".',
+      firebase_sai: 'Không xác nhận được số này. Bấm "Gửi lại mã" rồi thử lại.',
+      mat_khau_yeu: 'Mật khẩu cần ít nhất 6 ký tự — bấm "Đổi số khác" để nhập lại.',
+    }[tra.ket_qua] || `Server đang lỗi, thử lại sau ít phút (${tra.ket_qua || 'khong_ro'}).`;
+  } catch (err) {
+    const [o, chu] = err && err.code ? cauLoiFirebase(err.code) : [null, 'Không kết nối được — kiểm tra mạng rồi thử lại.'];
+    if (o === 'ma') datLoi('ma', chu); else $('thongbao-ma').textContent = chu;
+  } finally {
+    $('nut-ma').disabled = false;
+    $('nut-ma').textContent = 'Xác nhận và tạo tài khoản';
+  }
+});
+
+$('gui-lai').addEventListener('click', async (e) => {
+  e.preventDefault();
+  $('thongbao-ma').textContent = '';
+  try {
+    await guiMa(dangKy.so);
+    $('ma').value = '';
+    $('thongbao-ma').textContent = 'Đã gửi mã mới.';
+  } catch (err) {
+    $('thongbao-ma').textContent = cauLoiFirebase(err && err.code)[1];
+  }
+});
+
+$('doi-so').addEventListener('click', (e) => {
+  e.preventDefault();
+  $('form-ma').hidden = true;
+  $('form').hidden = false;
 });
 </script>
 </body>

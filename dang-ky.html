@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tạo tài khoản — PY POS</title>
-<meta name="description" content="Tạo tài khoản PY POS cho quán bằng số điện thoại, rồi đăng nhập app trên iPhone, iPad hoặc Android.">
+<meta name="description" content="Tạo tài khoản PY POS cho quán bằng số điện thoại, rồi tải app và đăng nhập trên Android, iPhone, iPad, máy tính Windows hoặc Mac.">
 <meta name="robots" content="index,follow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232E7D32'/><path fill='%23fff' fill-rule='evenodd' d='M12,25.4 H33.23 A14.53,14.53 0 0 1 33.23,54.46 H22.06 V74.58 H12 Z M22.06,33.22 H33.23 A6.71,6.71 0 0 1 33.23,46.63 H22.06 Z M52.23,25.4 H63.41 L70.11,39.93 L76.82,25.4 H87.99 L75.7,52.22 V74.58 H64.52 V52.22 Z'/></svg>">
 <!--
@@ -69,9 +69,6 @@
   button:disabled { opacity: .6; cursor: default; }
   .thongbao { color: var(--error); margin: 14px 0 0; }
   .thongbao:empty { display: none; }
-  .xong h2 { margin: 0 0 10px; font-size: 21px; }
-  .xong ol { padding-left: 22px; margin: 10px 0 0; }
-  .xong li { margin: 6px 0; }
   .so { font-weight: 700; }
   .tai { display: grid; gap: 10px; margin: 14px 0 6px; }
   .nut-tai {
@@ -82,8 +79,30 @@
   .nut-tai span { font-size: 14px; opacity: .9; }
   .nut-tai.sap-co { background: var(--green-soft); color: var(--muted); }
   @media (min-width: 480px) { .tai { grid-template-columns: 1fr 1fr; } }
-  .chan { color: var(--muted); font-size: 15px; margin: 22px 0 40px; }
+  main { padding-bottom: 40px; }
+
+  /* Thanh hai bước. Người mở trang này thường nghĩ "đăng ký xong là dùng
+     được", trong khi còn một bước nữa là cài app — nói trước từ đầu để họ
+     không đóng trang ngay sau khi tạo tài khoản. */
+  .buoc { list-style: none; display: flex; gap: 8px; padding: 0; margin: 26px 0 22px; counter-reset: b; }
+  .buoc li {
+    flex: 1; display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted);
+    padding-top: 10px; border-top: 4px solid var(--line);
+  }
+  .buoc li::before {
+    counter-increment: b; content: counter(b);
+    flex: none; width: 26px; height: 26px; border-radius: 13px; display: flex;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+    background: var(--line); color: var(--text);
+  }
+  .buoc li[aria-current="step"] { color: var(--text); font-weight: 600; border-top-color: var(--green); }
+  .buoc li[aria-current="step"]::before { background: var(--green); color: #fff; }
+  .buoc li.da-xong { border-top-color: var(--green); }
+  .buoc li.da-xong::before { content: "✓"; background: var(--green-soft); color: var(--green-dark); }
   [hidden] { display: none !important; }
+  /* Tiêu đề chỉ cho trình đọc màn hình và máy tìm kiếm — trên màn hình thì
+     thanh hai bước đã nói đủ. */
+  .an { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -93,13 +112,18 @@
 </div></div>
 
 <main class="wrap">
-  <h1>Tạo tài khoản cho quán</h1>
-  <p class="phu">Tạo xong, mở app PY POS trên iPhone, iPad hoặc Android và đăng nhập bằng đúng số điện thoại, mật khẩu này.</p>
+  <ol class="buoc" aria-label="Các bước">
+    <li id="b1" aria-current="step">Tạo tài khoản</li>
+    <li id="b2">Tải app và đăng nhập</li>
+  </ol>
+  <!-- Không tiêu đề, không câu dẫn: tên hai bước ở thanh trên đã nói đủ
+       đang làm gì và còn gì phía sau — thêm chữ ở đây là nói lại lần hai. -->
+  <h1 class="an">Tạo tài khoản PY POS</h1>
 
   <form id="form" novalidate>
     <div class="o">
       <label for="sdt">Số điện thoại</label>
-      <input id="sdt" type="tel" inputmode="tel" autocomplete="tel" placeholder="0901234567">
+      <input id="sdt" type="tel" inputmode="tel" autocomplete="tel">
       <p class="loi" id="loi-sdt"></p>
     </div>
     <div class="o">
@@ -132,8 +156,7 @@
   <div id="recaptcha"></div>
 
   <div class="xong" id="xong" hidden>
-    <h2>Đã tạo tài khoản</h2>
-    <p>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng. Giờ tải app về máy bán hàng để tiếp tục:</p>
+    <p id="da-tao" hidden>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng.</p>
     <div class="tai">
       <a class="nut-tai" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">
         <b>Google Play</b><span>Điện thoại, máy POS Android</span>
@@ -144,15 +167,14 @@
       <div class="nut-tai sap-co" id="ios-sap-co">
         <b>App Store</b><span>iPhone, iPad — sắp có</span>
       </div>
+      <a class="nut-tai" href="https://get.microsoft.com/installer/download/9NCLMSXLQ6HQ?referrer=appbadge&amp;mode=direct">
+        <b>Microsoft Store</b><span>Máy tính Windows</span>
+      </a>
+      <a class="nut-tai" id="tai-mac" href="#" hidden>
+        <b>App Store cho Mac</b><span>Mac chip Apple (M1 trở lên)</span>
+      </a>
     </div>
-    <ol>
-      <li>Mở app <b>PY POS</b> vừa tải.</li>
-      <li>Đăng nhập bằng số điện thoại và mật khẩu vừa đặt.</li>
-      <li>Bấm <b>Tạo quán mới</b>, đặt tên quán là bán được.</li>
-    </ol>
   </div>
-
-  <p class="chan">Xem <a href="quyen-rieng-tu.html">chính sách quyền riêng tư</a> để biết PY POS lưu những gì.</p>
 </main>
 
 <!--
@@ -205,6 +227,11 @@ if (LINK_APP_STORE) {
   a.href = LINK_APP_STORE;
   a.hidden = false;
   document.getElementById('ios-sap-co').hidden = true;
+  // Mac chip Apple cài đúng bản iPad này qua Mac App Store ("Designed for
+  // iPad") — cùng một link.
+  const mac = document.getElementById('tai-mac');
+  mac.href = LINK_APP_STORE;
+  mac.hidden = false;
 }
 
 // ---- Ba luật dưới đây chép từ app, phải giữ Y HỆT ----
@@ -283,11 +310,21 @@ function cauLoiFirebase(code) {
   }
 }
 
-function hienXong(so) {
+// Sang bước 2 sau khi vừa tạo xong tài khoản [so].
+function sangBuoc2(so) {
+  $('da-tao').hidden = false;
   $('so-xong').textContent = '0' + so.slice(2);
   $('form').hidden = true;
   $('form-ma').hidden = true;
   $('xong').hidden = false;
+  $('b1').removeAttribute('aria-current');
+  $('b1').classList.add('da-xong');
+  $('b2').setAttribute('aria-current', 'step');
+  window.scrollTo({ top: 0 });
+}
+
+function hienXong(so) {
+  sangBuoc2(so);
 }
 
 async function guiMa(so) {

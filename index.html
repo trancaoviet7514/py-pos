@@ -122,6 +122,33 @@
   .nav .btn-primary { color: #fff; }
   .nav .btn-primary:hover { color: #fff; }
 
+  /* Menu "Tải app" — giống các app khác: một mục trên thanh đầu trang, bấm
+     sổ ra từng nơi tải theo loại máy. Trước đây link tải chỉ nằm ở chân
+     trang, người muốn cài thử phải cuộn hết trang mới thấy. */
+  .tai-app { position: relative; }
+  .nut-tai-app {
+    font: inherit; font-size: 16px; color: var(--muted); background: none; border: 0;
+    padding: 6px 2px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  }
+  .nut-tai-app:hover, .nut-tai-app[aria-expanded="true"] { color: var(--green-dark); }
+  .nut-tai-app svg { width: 16px; height: 16px; transition: transform .18s ease; }
+  .nut-tai-app[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .menu-tai {
+    position: absolute; right: 0; top: calc(100% + 10px); width: 240px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(26, 28, 25, .14); padding: 8px; z-index: 20;
+  }
+  .nav .menu-tai a {
+    display: flex; align-items: center; gap: 12px; padding: 10px 10px;
+    border-radius: 10px; color: var(--text); font-size: 15px; line-height: 1.35;
+  }
+  .nav .menu-tai a:hover { background: var(--green-soft); color: var(--text); }
+  .menu-tai .ic {
+    flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--green-soft);
+    color: var(--green-dark); display: flex; align-items: center; justify-content: center;
+  }
+  .menu-tai .ic svg { width: 20px; height: 20px; }
+
   /* ---------- hero ---------- */
   /* Hero hai cột: chữ bên trái, một cái máy đang bán bên phải. Khuôn này
      lấy từ ba trang lớn trong ngành, và chỗ nó hơn cột-giữa là người xem
@@ -733,7 +760,11 @@
     .hero { padding: 32px 0 30px; }
     /* Ẩn LINK trong thanh trên nhưng giữ lại nút — bỏ cả thanh thì trên
        điện thoại không còn chỗ nào bấm liên hệ ngoài lúc cuộn tới cuối. */
-    .nav a:not(.btn) { display: none; }
+    .nav > a:not(.btn) { display: none; }
+    /* Menu Tải app GIỮ trên điện thoại: chủ quán đọc trang này trên chính
+       cái điện thoại sẽ cài app. Thu gọn chữ cho vừa cạnh nút liên hệ. */
+    .nut-tai-app { font-size: 14px; }
+    .menu-tai { left: 0; right: auto; }
     .btn { display: block; width: 100%; text-align: center; }
     .top .btn { display: inline-block; width: auto; padding: 8px 14px; font-size: 14px; }
     /* MỘT cột trên điện thoại. Hai cột ở bề ngang này chỉ còn ~158px mỗi
@@ -771,6 +802,29 @@
       <a href="#gia">Gói</a>
       <a href="#bat-dau">Bắt đầu</a>
       <a href="#cau-hoi">Câu hỏi</a>
+      <div class="tai-app">
+        <button type="button" class="nut-tai-app" aria-expanded="false" aria-controls="menu-tai">Tải app
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="menu-tai" id="menu-tai" hidden>
+          <a href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span>
+            <span>Android</span>
+          </a>
+          <a href="https://apps.apple.com/vn/app/py-pos-nh%C3%A0-h%C3%A0ng/id6820343854">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18h2"/></svg></span>
+            <span>iPhone, iPad</span>
+          </a>
+          <a href="https://get.microsoft.com/installer/download/9NCLMSXLQ6HQ?referrer=appbadge&amp;mode=direct">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+            <span>Máy tính Windows</span>
+          </a>
+          <a href="https://apps.apple.com/vn/app/py-pos-nh%C3%A0-h%C3%A0ng/id6820343854">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg></span>
+            <span>Máy Mac</span>
+          </a>
+        </div>
+      </div>
       <a class="btn btn-primary btn-nho nav-cta" href="dang-ky.html">Dùng thử miễn phí</a>
     </nav>
   </div>
@@ -1336,6 +1390,10 @@
         <b>Liên hệ</b>
         <a href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">Tải trên Play Store</a>
         <a href="https://apps.apple.com/vn/app/py-pos-nh%C3%A0-h%C3%A0ng/id6820343854">Tải trên App Store</a>
+        <!-- Store Web Installer: khách bấm là tải về một bộ cài nhỏ, bộ cài kéo app
+             từ Microsoft Store về — app do Microsoft ký nên không bị SmartScreen
+             chặn, và tự cập nhật (docs/phat-hanh-windows.md). -->
+        <a href="https://get.microsoft.com/installer/download/9NCLMSXLQ6HQ?referrer=appbadge&amp;mode=direct">Tải cho Windows</a>
         <a href="https://zalo.me/0934773909">Zalo 0934 773 909</a>
       </div>
     </div>
@@ -1367,6 +1425,30 @@
     };
     doiBong();
     addEventListener("scroll", doiBong, { passive: true });
+  }
+
+  // ---------- Menu Tải app ----------
+  //
+  // Bấm để mở / đóng (không mở khi rê chuột: trên điện thoại không có rê
+  // chuột, mà đây là trang đọc trên điện thoại nhiều nhất). Bấm ra ngoài
+  // hoặc phím Esc là đóng.
+  var nutTai = document.querySelector(".nut-tai-app");
+  var menuTai = document.getElementById("menu-tai");
+  if (nutTai && menuTai) {
+    var datMo = function (mo) {
+      nutTai.setAttribute("aria-expanded", mo ? "true" : "false");
+      menuTai.hidden = !mo;
+    };
+    nutTai.addEventListener("click", function (e) {
+      e.stopPropagation();
+      datMo(menuTai.hidden);
+    });
+    document.addEventListener("click", function (e) {
+      if (!menuTai.hidden && !menuTai.contains(e.target)) datMo(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !menuTai.hidden) { datMo(false); nutTai.focus(); }
+    });
   }
 
   // ---------- Hiện dần khi cuộn tới ----------

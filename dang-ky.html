@@ -156,7 +156,6 @@
   <div id="recaptcha"></div>
 
   <div class="xong" id="xong" hidden>
-    <p id="da-tao" hidden>Tài khoản <span class="so" id="so-xong"></span> đã sẵn sàng.</p>
     <div class="tai">
       <a class="nut-tai" href="https://play.google.com/store/apps/details?id=com.pysoft.pypos">
         <b>Google Play</b><span>Điện thoại, máy POS Android</span>
@@ -310,10 +309,9 @@ function cauLoiFirebase(code) {
   }
 }
 
-// Sang bước 2 sau khi vừa tạo xong tài khoản [so].
-function sangBuoc2(so) {
-  $('da-tao').hidden = false;
-  $('so-xong').textContent = '0' + so.slice(2);
+// Sang bước 2 sau khi vừa tạo xong tài khoản. Không nhắc lại số vừa tạo:
+// dấu ✓ ở bước 1 đã nói tạo xong rồi.
+function sangBuoc2() {
   $('form').hidden = true;
   $('form-ma').hidden = true;
   $('xong').hidden = false;
@@ -383,7 +381,10 @@ $('form').addEventListener('submit', async (e) => {
   if (loiSdt || loiMk || loiMk2) return;
 
   $('nut').disabled = true;
-  $('nut').textContent = 'Đang gửi mã…';
+  // "Đang tạo tài khoản" chứ không "Đang gửi mã": đúng cho cả hai đường —
+  // xác nhận số đang tắt (server trả `chua_co_sms`) thì đây là lúc tạo tài
+  // khoản thật, còn bật thì gửi mã cũng là một phần của việc tạo tài khoản.
+  $('nut').textContent = 'Đang tạo tài khoản…';
   try {
     // Hỏi server TRƯỚC khi nhờ Firebase gửi tin: mỗi tin là tiền, và số đã
     // có tài khoản thì gửi mã xong cũng không tạo được.

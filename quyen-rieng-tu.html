@@ -75,15 +75,17 @@
 <div class="wrap">
 
   <h1>Chính sách quyền riêng tư</h1>
-  <p class="ngay">Áp dụng từ 27/09/2026 · Đổi email liên hệ 04/10/2026 · Thêm mục người của PY POS xem được gì 08/10/2026 · Bản mới nhất luôn ở địa chỉ này</p>
+  <p class="ngay">Áp dụng từ 27/09/2026 · Đổi email liên hệ 04/10/2026 · Thêm mục người của PY POS xem được gì 08/10/2026 · Thêm thành viên &amp; tích điểm 25/10/2026 · Bản mới nhất luôn ở địa chỉ này</p>
 
   <div class="hop">
     <p><b>Nói ngắn:</b> PY POS là phần mềm bán hàng cho quán. Chúng tôi thu
     <b>số điện thoại</b> của bạn để làm tài khoản, và lưu <b>dữ liệu kinh
     doanh của quán</b> (menu, đơn hàng, kho, ca làm, nhân viên) để bạn đổi máy
     không mất gì và xem báo cáo từ xa.</p>
-    <p>Chúng tôi <b>không</b> thu thông tin của khách vào quán bạn, <b>không</b>
-    có quảng cáo, <b>không</b> có công cụ theo dõi hành vi, và <b>không</b> bán
+    <p>Nếu quán <b>tự bật</b> tích điểm thành viên, app lưu số điện thoại
+    và tên gọi (không bắt buộc) của khách đọc số lúc thu tiền — xem mục 2b.
+    Quán không bật thì app <b>không</b> thu thông tin nào của khách. Chúng
+    tôi <b>không</b> có quảng cáo, <b>không</b> có công cụ theo dõi hành vi, và <b>không</b> bán
     hay cho thuê dữ liệu của bạn cho bất kỳ ai.</p>
   </div>
 
@@ -140,12 +142,37 @@
       <td>Chốt ca và truy vết thất thoát</td>
       <td>Có</td>
     </tr>
+    <tr>
+      <td><b>Khách thành viên</b> (chỉ khi quán bật tích điểm): số điện
+      thoại và tên gọi khách đọc lúc thu tiền, điểm chỉnh tay kèm lý do</td>
+      <td>Tích điểm và cho khách dùng điểm trừ tiền</td>
+      <td>Có — để mọi máy của quán cùng thấy điểm của khách</td>
+    </tr>
   </table>
+
+  <h3>2b. Số điện thoại của khách vào quán (tích điểm thành viên)</h3>
+  <ul>
+    <li><b>Mặc định tắt.</b> Chủ quán tự bật trong Quản lý › Thành viên &amp;
+    tích điểm. Khi bật, <b>quán</b> là bên quyết định thu số của khách để
+    tích điểm; PY POS chỉ lưu giúp.</li>
+    <li>Chỉ lưu số điện thoại và tên gọi khách cho (không bắt buộc). Đơn
+    hàng chỉ ghi mã khách, không chép số hay tên khách xuống đơn.</li>
+    <li>Màn hình ở quầy luôn <b>che giữa số</b> (090•••4567), hóa đơn in
+    090***4567. Nhân viên chỉ tra được bằng 3 số cuối trở lên; chỉ chủ quán
+    xem được danh sách khách và số đầy đủ.</li>
+    <li><b>Khách yêu cầu xóa:</b> chủ quán bấm "Xóa thông tin khách" — số và
+    tên bị xóa trên mọi máy của quán và trên máy chủ, không khôi phục lại
+    được (kể cả khi một máy cũ đẩy dữ liệu cũ lên). Đơn cũ và doanh thu giữ
+    nguyên nhưng không còn biết là của ai. File sao lưu chủ quán đã tự lưu
+    trên máy trước đó vẫn còn số đó, chúng tôi không với tới được.</li>
+    <li>Xóa tài khoản hoặc xóa quán (mục 6) thì danh sách khách của quán bị
+    xóa theo.</li>
+  </ul>
 
   <h3>Chúng tôi KHÔNG thu những gì</h3>
   <ul>
-    <li><b>Không thu thông tin khách vào quán bạn.</b> Đơn hàng chỉ lưu món,
-    tiền, bàn và giờ — không có tên, số điện thoại hay địa chỉ của khách.</li>
+    <li><b>Không thu thông tin khách vào quán bạn</b> — trừ khi quán tự bật
+    tích điểm thành viên (mục 2b). Không bao giờ thu địa chỉ của khách.</li>
     <li><b>Không thu vị trí.</b> App không xin quyền vị trí.</li>
     <li><b>Không đọc danh bạ, tin nhắn, cuộc gọi.</b> App chỉ xin duy nhất
     quyền <code>INTERNET</code>.</li>
@@ -198,7 +225,8 @@
     <li>Số đơn và doanh thu theo ngày, đơn gần nhất lúc nào, lần đồng bộ
     gần nhất, quán đang bán trên mấy máy.</li>
   </ul>
-  <p>Công cụ đó <b>không</b> xem được từng hóa đơn hay từng món đã bán, và
+  <p>Công cụ đó <b>không</b> xem được từng hóa đơn hay từng món đã bán,
+  <b>không</b> xem được danh sách khách thành viên của quán, và
   không sửa được dữ liệu của quán. Tài khoản quản trị bắt buộc xác thực
   hai lớp, và <b>mỗi lần xem đều được ghi lại</b> (ai, lúc nào, xem quán
   nào). Bạn muốn biết dữ liệu quán mình đã được xem những lúc nào thì gửi
